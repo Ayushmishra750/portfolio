@@ -135,9 +135,9 @@ export default function Hero() {
             View Projects
           </MagneticButton>
 
-          <MagneticButton href="/resume.pdf" download>
+          <MagneticButton href="https://www.linkedin.com/in/ayushm790/" target="_blank">
             <Download className="w-4 h-4" />
-            Download Resume
+            View Resume
           </MagneticButton>
 
           <MagneticButton onClick={scrollToContact} ghost>
@@ -191,6 +191,7 @@ function MagneticButton({
   onClick,
   href,
   download,
+  target,
   primary,
   ghost,
 }: {
@@ -198,6 +199,7 @@ function MagneticButton({
   onClick?: () => void
   href?: string
   download?: boolean
+  target?: string
   primary?: boolean
   ghost?: boolean
 }) {
@@ -231,6 +233,8 @@ function MagneticButton({
         ref={ref as React.Ref<HTMLAnchorElement>}
         href={href}
         download={download}
+        target={target}
+        rel={target === '_blank' ? 'noopener noreferrer' : undefined}
         className={className}
         onMouseMove={handleMouseMove as any}
         onMouseLeave={handleMouseLeave}

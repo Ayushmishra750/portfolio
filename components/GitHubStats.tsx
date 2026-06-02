@@ -69,7 +69,7 @@ export default function GitHubStats() {
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ delay: 0.6 }}
-              href="https://github.com/ayushmishra"
+              href="https://github.com/Ayushmishra750"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-3 w-full glass rounded-2xl p-4 group hover:bg-white/[0.07] transition-all border border-white/5 hover:border-white/15"

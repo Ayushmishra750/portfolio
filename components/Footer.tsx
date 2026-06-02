@@ -37,8 +37,8 @@ export default function Footer() {
           {/* Socials + scroll top */}
           <div className="flex items-center gap-3">
             {[
-              { icon: Github, href: 'https://github.com/ayushmishra', label: 'GitHub' },
-              { icon: Linkedin, href: 'https://linkedin.com/in/ayushmishra', label: 'LinkedIn' },
+              { icon: Github, href: 'https://github.com/Ayushmishra750', label: 'GitHub' },
+              { icon: Linkedin, href: 'https://www.linkedin.com/in/ayushm790/', label: 'LinkedIn' },
               { icon: Mail, href: 'mailto:ayushmishra750980@gmail.com', label: 'Email' },
             ].map(s => (
               <motion.a

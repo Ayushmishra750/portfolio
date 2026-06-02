@@ -14,16 +14,16 @@ const socials = [
   },
   {
     label: 'LinkedIn',
-    value: 'linkedin.com/in/ayushmishra',
+    value: 'linkedin.com/in/ayushm790',
     icon: Linkedin,
-    href: 'https://linkedin.com/in/ayushmishra',
+    href: 'https://www.linkedin.com/in/ayushm790/',
     color: '#0A66C2',
   },
   {
     label: 'GitHub',
-    value: 'github.com/ayushmishra',
+    value: 'github.com/Ayushmishra750',
     icon: Github,
-    href: 'https://github.com/ayushmishra',
+    href: 'https://github.com/Ayushmishra750',
     color: '#A855F7',
   },
 ]
