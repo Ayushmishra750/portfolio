@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { Github, Linkedin, Mail, Heart, ArrowUp } from 'lucide-react'
+import { Github, Linkedin, Mail, ArrowUp } from 'lucide-react'
 
 export default function Footer() {
   const scrollTop = () => window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -26,12 +26,7 @@ export default function Footer() {
 
           {/* Center */}
           <div className="text-center">
-            <p className="text-[#94A3B8] text-sm flex items-center gap-1.5">
-              Built with{' '}
-              <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400" />
-              {' '}using Next.js & Framer Motion
-            </p>
-            <p className="text-[#94A3B8]/50 text-xs mt-1">© {new Date().getFullYear()} Ayush Mishra. All rights reserved.</p>
+            <p className="text-[#94A3B8]/50 text-xs">© {new Date().getFullYear()} Ayush Mishra. All rights reserved.</p>
           </div>
 
           {/* Socials + scroll top */}
