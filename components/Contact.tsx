@@ -39,9 +39,37 @@ export default function Contact() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
-    await new Promise(r => setTimeout(r, 1500))
-    setLoading(false)
-    setSubmitted(true)
+
+    try {
+      const res = await fetch('https://formspree.io/f/xpwznawy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          message: form.message,
+        }),
+      })
+
+      if (res.ok) {
+        setSubmitted(true)
+        setForm({ name: '', email: '', message: '' })
+      } else {
+        // Fallback: open mailto with pre-filled content
+        const subject = encodeURIComponent(`Portfolio contact from ${form.name}`)
+        const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`)
+        window.open(`mailto:ayushmishra750980@gmail.com?subject=${subject}&body=${body}`)
+        setSubmitted(true)
+      }
+    } catch {
+      // Fallback: open mailto with pre-filled content
+      const subject = encodeURIComponent(`Portfolio contact from ${form.name}`)
+      const body = encodeURIComponent(`Name: ${form.name}\nEmail: ${form.email}\n\nMessage:\n${form.message}`)
+      window.open(`mailto:ayushmishra750980@gmail.com?subject=${subject}&body=${body}`)
+      setSubmitted(true)
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
