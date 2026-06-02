@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --no-src-dir --import-alias \"@/*\" --yes)",
+      "PowerShell(node --version)",
+      "PowerShell(npm --version)",
+      "PowerShell(Get-Command npm)",
+      "PowerShell($env:PATH; ls \"C:\\\\Program Files\\\\nodejs\\\\\" 2>$null; ls \"C:\\\\Program Files \\(x86\\)\\\\nodejs\\\\\" 2>$null; ls \"$env:APPDATA\\\\npm\\\\\" 2>$null; ls \"$env:ProgramFiles\\\\nodejs\" 2>$null)",
+      "Bash(git --version)",
+      "Bash(git config *)",
+      "Bash(git init *)",
+      "Bash(git add *)",
+      "Bash(git commit -m 'Initial commit: Ayush Mishra portfolio website *)"
+    ]
+  }
+}
