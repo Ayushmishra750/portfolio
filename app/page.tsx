@@ -10,6 +10,7 @@ import About from '@/components/About'
 import Skills from '@/components/Skills'
 import Experience from '@/components/Experience'
 import Projects from '@/components/Projects'
+import DataGlobe from '@/components/DataGlobe'
 import DataPipeline from '@/components/DataPipeline'
 import Certifications from '@/components/Certifications'
 import GitHubStats from '@/components/GitHubStats'
@@ -36,6 +37,7 @@ export default function Home() {
       <Skills />
       <Experience />
       <Projects />
+      <DataGlobe />
       <DataPipeline />
       <Certifications />
       <GitHubStats />
