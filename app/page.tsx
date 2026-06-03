@@ -40,9 +40,9 @@ export default function Home() {
       <Projects />
       <DataGlobe />
       <DataPipeline />
-      <Terminal />
       <Certifications />
       <GitHubStats />
+      <Terminal />
       <Contact />
       <Footer />
     </main>

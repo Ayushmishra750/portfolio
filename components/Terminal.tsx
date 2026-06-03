@@ -202,6 +202,7 @@ export default function TerminalSection() {
   const sectionRef = useRef<HTMLDivElement>(null)
   const inView     = useInView(sectionRef, { once: true, margin: '-100px' })
   const inputRef   = useRef<HTMLInputElement>(null)
+  const outputRef  = useRef<HTMLDivElement>(null)
   const bottomRef  = useRef<HTMLDivElement>(null)
 
   const [input,       setInput]       = useState('')
@@ -224,9 +225,10 @@ export default function TerminalSection() {
     setBooted(true)
   }, [inView, booted])
 
-  // Auto-scroll
+  // Auto-scroll — scroll only inside the terminal output box, not the page
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+    const el = outputRef.current
+    if (el) el.scrollTop = el.scrollHeight
   }, [history])
 
   // Tab suggestion
@@ -361,6 +363,7 @@ export default function TerminalSection() {
 
           {/* Output area */}
           <div
+            ref={outputRef}
             className="bg-[#0d1117] p-4 font-mono text-xs leading-5 min-h-[380px] max-h-[500px] overflow-y-auto cursor-text"
             style={{ scrollbarWidth: 'thin', scrollbarColor: '#38BDF8 transparent' }}
           >
@@ -422,7 +425,7 @@ export default function TerminalSection() {
                   autoComplete="off"
                   autoCorrect="off"
                   spellCheck={false}
-                  autoFocus
+                  autoFocus={false}
                   placeholder=""
                 />
               </div>
