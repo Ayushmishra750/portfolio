@@ -17,6 +17,7 @@ import Certifications from '@/components/Certifications'
 import GitHubStats from '@/components/GitHubStats'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
+import TerminalFab from '@/components/TerminalFab'
 
 export default function Home() {
   const [loading, setLoading] = useState(true)
@@ -45,6 +46,7 @@ export default function Home() {
       <Terminal />
       <Contact />
       <Footer />
+      <TerminalFab />
     </main>
   )
 }
