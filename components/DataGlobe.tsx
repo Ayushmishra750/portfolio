@@ -426,16 +426,19 @@ export default function DataGlobe() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
             className="relative h-[420px] md:h-[520px]"
           >
-            {/* Dark "space" backdrop so the gold hologram globe reads as
-                intentional in both light and dark themes */}
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{
-                zIndex: 0,
-                background:
-                  'radial-gradient(circle at 50% 46%, rgba(6,7,15,0.97) 0%, rgba(6,7,15,0.9) 38%, rgba(6,7,15,0) 72%)',
-              }}
-            />
+            {/* Dark "space" backdrop — dark theme only. In light theme it
+                bled out as a dark shadow ring around the globe, so we omit it
+                and let the globe sit cleanly on the light page. */}
+            {!light && (
+              <div
+                className="absolute inset-0 pointer-events-none"
+                style={{
+                  zIndex: 0,
+                  background:
+                    'radial-gradient(circle at 50% 46%, rgba(6,7,15,0.97) 0%, rgba(6,7,15,0.9) 38%, rgba(6,7,15,0) 72%)',
+                }}
+              />
+            )}
             <Canvas
               camera={{ position: [0, 0, 4.8], fov: 42 }}
               style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
