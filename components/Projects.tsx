@@ -149,9 +149,12 @@ export default function Projects() {
               onClick={() => setSelected(project)}
               className="glass rounded-2xl p-7 cursor-pointer group relative overflow-hidden transition-all duration-300"
               style={{
-                border: `1px solid ${hovered === project.id ? project.color + '40' : 'rgba(255,255,255,0.07)'}`,
-                boxShadow: hovered === project.id ? `0 0 40px ${project.color}15` : 'none',
-                transform: hovered === project.id ? 'translateY(-4px)' : 'translateY(0)',
+                border: `1px solid ${hovered === project.id ? project.color + '40' : 'var(--card-border-rest)'}`,
+                boxShadow:
+                  hovered === project.id
+                    ? `0 24px 50px var(--elev-shadow), 0 0 40px ${project.color}22`
+                    : 'var(--card-shadow-rest)',
+                transform: hovered === project.id ? 'translateY(-8px)' : 'translateY(0)',
               }}
             >
               {/* Background gradient on hover */}

@@ -133,9 +133,12 @@ export default function Skills() {
                 onMouseLeave={() => setHoveredSkill(null)}
                 className="glass rounded-2xl p-6 group cursor-default transition-all duration-300 hover:bg-white/[0.08]"
                 style={{
-                  borderColor: hoveredSkill === skill.name ? current.color + '60' : 'transparent',
-                  border: '1px solid',
-                  boxShadow: hoveredSkill === skill.name ? `0 0 30px ${current.color}20` : 'none',
+                  border: `1px solid ${hoveredSkill === skill.name ? current.color + '60' : 'var(--card-border-rest)'}`,
+                  boxShadow:
+                    hoveredSkill === skill.name
+                      ? `0 18px 40px var(--elev-shadow), 0 0 30px ${current.color}22`
+                      : 'var(--card-shadow-rest)',
+                  transform: hoveredSkill === skill.name ? 'translateY(-4px)' : 'translateY(0)',
                 }}
               >
                 <div className="flex items-start justify-between mb-4">

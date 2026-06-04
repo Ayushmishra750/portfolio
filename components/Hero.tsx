@@ -39,10 +39,34 @@ export default function Hero() {
   }
 
   return (
-    <section id="hero" ref={containerRef} className="force-dark relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-16 md:pt-0 md:pb-0">
-      {/* 3D Network Background */}
-      <div className="absolute inset-0">
+    <section id="hero" ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-16 md:pt-0 md:pb-0">
+      {/* 3D Network Background (toned down in light mode) */}
+      <div className="hero-canvas absolute inset-0">
         <NetworkBackground />
+      </div>
+
+      {/* Premium light-mode backdrop: mesh gradient, floating orbs, subtle grid */}
+      <div className="hero-light-decor absolute inset-0 pointer-events-none overflow-hidden">
+        <div
+          className="absolute inset-0"
+          style={{
+            background:
+              'radial-gradient(ellipse 80% 60% at 18% 8%, rgba(56,189,248,0.20), transparent 60%), radial-gradient(ellipse 70% 60% at 86% 18%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(ellipse 90% 70% at 50% 105%, rgba(52,211,153,0.12), transparent 60%)',
+          }}
+        />
+        <div className="float-1 absolute top-[14%] left-[10%] w-72 h-72 rounded-full blur-[90px]" style={{ background: 'rgba(56,189,248,0.28)' }} />
+        <div className="float-2 absolute top-[38%] right-[8%] w-80 h-80 rounded-full blur-[100px]" style={{ background: 'rgba(168,85,247,0.24)' }} />
+        <div className="float-3 absolute bottom-[8%] left-[42%] w-64 h-64 rounded-full blur-[90px]" style={{ background: 'rgba(52,211,153,0.18)' }} />
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(15,23,42,0.045) 1px, transparent 1px), linear-gradient(90deg, rgba(15,23,42,0.045) 1px, transparent 1px)',
+            backgroundSize: '48px 48px',
+            maskImage: 'radial-gradient(ellipse 70% 60% at 50% 38%, black, transparent 78%)',
+            WebkitMaskImage: 'radial-gradient(ellipse 70% 60% at 50% 38%, black, transparent 78%)',
+          }}
+        />
       </div>
 
       {/* Aurora overlay */}

@@ -11,6 +11,12 @@
   --accent-purple: #A855F7;
   --text: #FFFFFF;
   --muted: #94A3B8;
+
+  /* Theme-aware elevation tokens (consumed by inline styles in cards).
+     Dark = no resting shadow, neon glow on hover. */
+  --card-border-rest: rgba(255, 255, 255, 0.07);
+  --card-shadow-rest: none;
+  --elev-shadow: rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -183,73 +189,166 @@ body {
 }
 
 /* ─────────────────────────────────────────────────────────────────────────────
-   Light theme
-   Default (no .light class) stays fully dark — zero regression.
-   In light mode we flip content surfaces/text, while "force-dark" showcase
-   sections (Hero, Globe, Live Telemetry, Terminal, Loader) stay dark.
+   LIGHT THEME — a separate, premium design system (not a dark inversion).
+   ▸ Off-white sections (#F8FAFC / #F1F5F9) with a gentle alternating rhythm
+   ▸ Solid WHITE cards that float with layered, soft shadows
+   ▸ Deeper, higher-contrast accent + heading colours
+   ▸ "force-dark" showcase sections (Hero decor aside, Globe, Telemetry,
+     Pipeline, Terminal, Loader) stay fully dark as featured panels.
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* Smooth theme transition */
-body { transition: background-color 0.4s ease, color 0.4s ease; }
-.glass, .glass-strong { transition: background-color 0.4s ease, border-color 0.4s ease; }
+body { transition: background-color 0.45s ease, color 0.45s ease; }
+.glass, .glass-strong {
+  transition: background-color 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease;
+}
+
+/* Light elevation tokens (consumed by inline card styles) */
+html.light {
+  --card-border-rest: #E2E8F0;
+  --card-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.06);
+  --elev-shadow: rgba(15, 23, 42, 0.14);
+}
 
 html.light body {
-  background: #F1F5F9;
+  background: #F8FAFC;
   color: #0F172A;
 }
 
+/* Alternating section rhythm so white cards read as "floating" */
+html.light #about,
+html.light #experience,
+html.light #certifications,
+html.light #contact      { background-color: #F8FAFC; }
+html.light #skills,
+html.light #projects,
+html.light #github       { background-color: #F1F5F9; }
+
 /* Surfaces & text */
-html.light .bg-\[\#050816\]        { background-color: #F1F5F9 !important; }
+html.light .bg-\[\#050816\]        { background-color: #F8FAFC !important; }
+html.light .border-\[\#050816\]    { border-color: #F8FAFC !important; }
 html.light .text-white             { color: #0F172A !important; }
 html.light .text-\[\#94A3B8\]      { color: #475569 !important; }
 html.light .text-\[\#CBD5E1\]      { color: #334155 !important; }
 html.light .text-\[\#64748B\]      { color: #64748B !important; }
 
-/* Glass */
-html.light .glass {
-  background: rgba(15, 23, 42, 0.04);
-  border-color: rgba(15, 23, 42, 0.10);
-}
-html.light .glass-strong {
-  background: rgba(255, 255, 255, 0.70);
-  border-color: rgba(15, 23, 42, 0.10);
+/* Deepen neon accents for AA-ish contrast on white */
+html.light .text-\[\#38BDF8\]      { color: #0284C7 !important; }
+html.light .text-\[\#A855F7\]      { color: #9333EA !important; }
+html.light .text-\[\#34D399\]      { color: #059669 !important; }
+
+/* Headings & big display gradient — deepen so it stays legible on white */
+html.light .gradient-text {
+  background: linear-gradient(135deg, #0284C7, #9333EA);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
-/* White tints → dark tints (base surfaces) */
+/* Cards: solid white, real depth from layered shadows */
+html.light .glass {
+  background: #FFFFFF;
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+html.light .glass-strong {
+  background: rgba(255, 255, 255, 0.88);
+  border-color: #E2E8F0;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 16px 48px rgba(15, 23, 42, 0.10);
+}
+
+/* Translucent floating navbar with soft shadow */
+html.light nav .glass {
+  background: rgba(255, 255, 255, 0.72) !important;
+  border-color: rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 6px 28px rgba(15, 23, 42, 0.08) !important;
+}
+html.light nav .bg-white { background-color: #0F172A !important; }
+
+/* White tints → soft neutral tints (skill bars, chips, tracks) */
 html.light .bg-white\/5,
 html.light .bg-white\/10,
 html.light .bg-white\/20,
 html.light .bg-white\/\[0\.03\],
-html.light .bg-white\/\[0\.08\]   { background-color: rgba(15, 23, 42, 0.05) !important; }
+html.light .bg-white\/\[0\.08\]   { background-color: rgba(15, 23, 42, 0.04) !important; }
 
 /* Hover feedback in light mode */
 html.light .hover\:bg-white\/\[0\.07\]:hover,
-html.light .hover\:bg-white\/5:hover { background-color: rgba(15, 23, 42, 0.07) !important; }
+html.light .hover\:bg-white\/5:hover { background-color: rgba(15, 23, 42, 0.05) !important; }
 
 /* Borders */
 html.light .border-white\/5,
 html.light .border-white\/10,
 html.light .border-white\/15,
 html.light .border-white\/20,
-html.light .border-white\/40      { border-color: rgba(15, 23, 42, 0.10) !important; }
+html.light .border-white\/40      { border-color: #E2E8F0 !important; }
 
-/* Soften aurora & scrollbar on light */
-html.light .aurora-bg { opacity: 0.55; }
+/* Aurora becomes a gentle colour bloom; refined scrollbar */
+html.light .aurora-bg {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 18% 28%, rgba(56,189,248,0.10) 0%, transparent 55%),
+    radial-gradient(ellipse at 82% 18%, rgba(168,85,247,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 55% 92%, rgba(52,211,153,0.06) 0%, transparent 55%);
+}
 html.light ::-webkit-scrollbar-track { background: #E2E8F0; }
+html.light ::selection { background: rgba(2,132,199,0.18); color: #0F172A; }
+
+/* Custom cursor stays visible on light (screen-blend would wash it out) */
+html.light .custom-cursor {
+  background: rgba(2, 132, 199, 0.85);
+  mix-blend-mode: normal;
+}
+html.light .custom-cursor-ring { border-color: rgba(2, 132, 199, 0.5); }
+
+/* Stronger, tactile Contact inputs in light mode */
+html.light #contact input,
+html.light #contact textarea {
+  background-color: #FFFFFF !important;
+  border-color: #CBD5E1 !important;
+  color: #0F172A !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+}
+html.light #contact input:focus,
+html.light #contact textarea:focus {
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14) !important;
+}
+
+/* Premium light Hero backdrop layer (hidden in dark) */
+.hero-light-decor { opacity: 0; transition: opacity 0.5s ease; }
+html.light .hero-light-decor { opacity: 1; }
+html.light .hero-canvas { opacity: 0.38; }
 
 /* ── Keep showcase sections dark in light mode (revert with higher specificity) ── */
-html.light .force-dark              { background-color: #050816 !important; }
+html.light .force-dark {
+  background-color: #050816 !important;
+  /* restore dark elevation tokens inside dark panels */
+  --card-border-rest: rgba(255, 255, 255, 0.07);
+  --card-shadow-rest: none;
+  --elev-shadow: rgba(0, 0, 0, 0.45);
+}
 html.light .force-dark .text-white  { color: #FFFFFF !important; }
 html.light .force-dark .text-\[\#94A3B8\] { color: #94A3B8 !important; }
 html.light .force-dark .text-\[\#CBD5E1\] { color: #CBD5E1 !important; }
+html.light .force-dark .text-\[\#38BDF8\] { color: #38BDF8 !important; }
+html.light .force-dark .text-\[\#A855F7\] { color: #A855F7 !important; }
+html.light .force-dark .text-\[\#34D399\] { color: #34D399 !important; }
 html.light .force-dark .bg-\[\#050816\]   { background-color: #050816 !important; }
+html.light .force-dark .border-\[\#050816\] { border-color: #050816 !important; }
+html.light .force-dark .gradient-text {
+  background: linear-gradient(135deg, #38BDF8, #A855F7);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
 html.light .force-dark .glass {
   background: rgba(255, 255, 255, 0.05) !important;
   border-color: rgba(255, 255, 255, 0.10) !important;
+  box-shadow: none !important;
 }
 html.light .force-dark .glass-strong {
   background: rgba(255, 255, 255, 0.08) !important;
   border-color: rgba(255, 255, 255, 0.15) !important;
+  box-shadow: none !important;
 }
 html.light .force-dark .bg-white\/5,
 html.light .force-dark .bg-white\/10,
