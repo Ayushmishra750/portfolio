@@ -111,23 +111,23 @@ function Arc({
 
   return (
     <group>
-      {/* Soft wide glow beneath the flow line */}
+      {/* Soft glow beneath the flow line */}
       <Line
         points={points}
         color={color}
         transparent
-        opacity={light ? 0.22 : 0.3}
-        lineWidth={light ? 5 : 6}
+        opacity={light ? 0.16 : 0.22}
+        lineWidth={light ? 2.4 : 3}
         depthWrite={false}
         blending={blend}
       />
-      {/* Bright, thicker core — the highlighted data flow */}
+      {/* Bright thin core — the data flow */}
       <Line
         points={points}
         color={color}
         transparent
         opacity={light ? 0.95 : 0.85}
-        lineWidth={light ? 2.2 : 2.6}
+        lineWidth={light ? 1.2 : 1.4}
         depthWrite={false}
         blending={blend}
       />
@@ -144,10 +144,11 @@ function Arc({
 const BORDERS_URL =
   'https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json'
 
-// Warm palette for the hologram-style globe (matches the reference image).
-const LAND_GOLD  = '#F5C24A' // continent fill grid
-const COAST_GOLD = '#FFDC8A' // crisp coastlines
-const GRID_GOLD  = '#B8923F' // faint graticule
+// Palette keyed to the portfolio's golden-orange accent so the globe feels
+// like part of the rest of the design rather than a separate gold artifact.
+const LAND_GOLD  = '#FB923C' // continent fill grid — portfolio accent orange
+const COAST_GOLD = '#FDBA74' // crisp coastlines — lighter amber
+const GRID_GOLD  = '#B26A2A' // faint graticule — deep ember
 
 // Ray-casting point-in-ring test in lng/lat space.
 function pointInRing(lng: number, lat: number, ring: number[][]): boolean {
@@ -309,58 +310,6 @@ function Graticule() {
   )
 }
 
-// ── Fresnel atmosphere ────────────────────────────────────────────────────────
-// A back-faced shell whose rim glows brightest at the silhouette edge — the
-// classic "glowing planet" halo. Additive in dark for drama; gentle in light.
-const ATMO_VERT = `
-  varying vec3 vNormal;
-  varying vec3 vView;
-  void main() {
-    vec4 mv = modelViewMatrix * vec4(position, 1.0);
-    vNormal = normalize(normalMatrix * normal);
-    vView   = normalize(-mv.xyz);
-    gl_Position = projectionMatrix * mv;
-  }
-`
-const ATMO_FRAG = `
-  varying vec3 vNormal;
-  varying vec3 vView;
-  uniform vec3  uColor;
-  uniform float uPower;
-  uniform float uIntensity;
-  void main() {
-    float fres = pow(1.0 - abs(dot(vNormal, vView)), uPower);
-    gl_FragColor = vec4(uColor, fres * uIntensity);
-  }
-`
-
-function Atmosphere() {
-  const mat = useMemo(
-    () =>
-      new THREE.ShaderMaterial({
-        uniforms: {
-          uColor:     { value: new THREE.Color('#F5C24A') }, // warm amber rim
-          uPower:     { value: 2.6 },
-          uIntensity: { value: 1.0 },
-        },
-        vertexShader: ATMO_VERT,
-        fragmentShader: ATMO_FRAG,
-        transparent: true,
-        side: THREE.BackSide,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      }),
-    []
-  )
-
-  return (
-    <mesh scale={1.16}>
-      <sphereGeometry args={[RADIUS, 64, 64]} />
-      <primitive object={mat} attach="material" />
-    </mesh>
-  )
-}
-
 function LocationMarker({
   lat, lng, color, size, primary,
 }: {
@@ -406,20 +355,17 @@ function GlobeScene({ light }: { light: boolean }) {
 
   return (
     <group>
-      {/* Dark glossy sphere — the unlit "ocean" the gold land glows against */}
+      {/* Dark glossy sphere — the unlit "ocean" the orange land glows against */}
       <mesh>
         <sphereGeometry args={[RADIUS, 96, 96]} />
-        <meshPhongMaterial color="#070708" emissive="#0C0A06" specular="#5A4A22" shininess={32} />
+        <meshPhongMaterial color="#070708" emissive="#0C0A06" specular="#5A3318" shininess={32} />
       </mesh>
 
-      {/* Faint gold graticule */}
+      {/* Faint graticule */}
       <Graticule />
 
       {/* Glowing grid continents + crisp coastlines */}
       <World />
-
-      {/* Amber fresnel rim glow */}
-      <Atmosphere />
 
       {/* Location markers */}
       {LOCATIONS.map((loc, i) => (
