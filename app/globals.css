@@ -17,6 +17,25 @@
   --card-border-rest: rgba(255, 255, 255, 0.07);
   --card-shadow-rest: none;
   --elev-shadow: rgba(0, 0, 0, 0.45);
+
+  /* Theme-aware surface tokens (consumed by inline styles in showcase sections) */
+  --page-bg: #050816;
+  --surface-line: rgba(255, 255, 255, 0.10);
+  --surface-dot: rgba(255, 255, 255, 0.20);
+
+  /* Terminal surfaces + syntax palette (dark defaults) */
+  --term-bg: #0d1117;
+  --term-bar: #0d1117;
+  --term-status: #0a0f17;
+  --term-window-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+  --term-ghost: rgba(255, 255, 255, 0.22);
+  --term-default: #CBD5E1;
+  --term-success: #34D399;
+  --term-error: #F87171;
+  --term-info: #38BDF8;
+  --term-accent: #A855F7;
+  --term-muted: #64748B;
+  --term-header: #F59E0B;
 }
 
 * {
@@ -193,8 +212,9 @@ body {
    ▸ Off-white sections (#F8FAFC / #F1F5F9) with a gentle alternating rhythm
    ▸ Solid WHITE cards that float with layered, soft shadows
    ▸ Deeper, higher-contrast accent + heading colours
-   ▸ "force-dark" showcase sections (Hero decor aside, Globe, Telemetry,
-     Pipeline, Terminal, Loader) stay fully dark as featured panels.
+   ▸ Showcase sections (Globe, Telemetry, Pipeline, Terminal) render FULLY
+     light via theme-aware CSS variables; only the startup Loader splash keeps
+     "force-dark" as an intentionally dark featured panel.
    ───────────────────────────────────────────────────────────────────────────── */
 
 /* Smooth theme transition */
@@ -208,6 +228,25 @@ html.light {
   --card-border-rest: #E2E8F0;
   --card-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.06);
   --elev-shadow: rgba(15, 23, 42, 0.14);
+
+  /* Light surface tokens */
+  --page-bg: #F8FAFC;
+  --surface-line: rgba(15, 23, 42, 0.12);
+  --surface-dot: rgba(15, 23, 42, 0.18);
+
+  /* Terminal becomes a clean light panel with dark mono text + colour accents */
+  --term-bg: #FFFFFF;
+  --term-bar: #EEF2F7;
+  --term-status: #EEF2F7;
+  --term-window-shadow: 0 20px 50px rgba(15, 23, 42, 0.15);
+  --term-ghost: rgba(15, 23, 42, 0.30);
+  --term-default: #334155;
+  --term-success: #059669;
+  --term-error: #DC2626;
+  --term-info: #0284C7;
+  --term-accent: #7C3AED;
+  --term-muted: #64748B;
+  --term-header: #B45309;
 }
 
 html.light body {
@@ -219,10 +258,14 @@ html.light body {
 html.light #about,
 html.light #experience,
 html.light #certifications,
-html.light #contact      { background-color: #F8FAFC; }
+html.light #contact,
+html.light #globe,
+html.light #telemetry,
+html.light #terminal     { background-color: #F8FAFC; }
 html.light #skills,
 html.light #projects,
-html.light #github       { background-color: #F1F5F9; }
+html.light #github,
+html.light #pipeline     { background-color: #F1F5F9; }
 
 /* Surfaces & text */
 html.light .bg-\[\#050816\]        { background-color: #F8FAFC !important; }
@@ -236,6 +279,12 @@ html.light .text-\[\#64748B\]      { color: #64748B !important; }
 html.light .text-\[\#38BDF8\]      { color: #0284C7 !important; }
 html.light .text-\[\#A855F7\]      { color: #9333EA !important; }
 html.light .text-\[\#34D399\]      { color: #059669 !important; }
+html.light .text-\[\#FB923C\]      { color: #EA580C !important; }
+html.light .text-\[\#F472B6\]      { color: #DB2777 !important; }
+
+/* Faint white text (ghost/labels) → readable muted slate on light */
+html.light .text-white\/20         { color: rgba(15, 23, 42, 0.30) !important; }
+html.light .text-white\/30         { color: rgba(15, 23, 42, 0.40) !important; }
 
 /* Headings & big display gradient — deepen so it stays legible on white */
 html.light .gradient-text {
@@ -243,6 +292,32 @@ html.light .gradient-text {
   -webkit-background-clip: text;
   background-clip: text;
 }
+
+/* Brand gradient BUTTONS/LOGOS — deepen the cyan→purple so they read as
+   premium (not neon) on a light page. Only solid fills (no /20 tint variants,
+   which carry a different class) are affected. */
+html.light .from-\[\#38BDF8\] {
+  --tw-gradient-from: #0284C7 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(2 132 199 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.light .to-\[\#A855F7\] {
+  --tw-gradient-to: #9333EA var(--tw-gradient-to-position) !important;
+}
+html.light .via-\[\#A855F7\] {
+  --tw-gradient-to: rgb(147 51 234 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #9333EA var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
+
+/* Button/logo LABELS on the deepened gradient must stay white for contrast.
+   Combined selectors hit only filled brand buttons & the AM logo — NOT the
+   Skills active tab (pastel bg keeps its dark label). */
+html.light .text-\[\#050816\].from-\[\#38BDF8\] { color: #FFFFFF !important; }
+html.light .text-white.from-\[\#38BDF8\]        { color: #FFFFFF !important; }
+
+/* Send-button loading spinner: light track so it reads on the gradient fill */
+html.light .border-\[\#050816\]\/30 { border-color: rgba(255, 255, 255, 0.40) !important; }
+html.light .border-t-\[\#050816\]   { border-top-color: #FFFFFF !important; }
 
 /* Cards: solid white, real depth from layered shadows */
 html.light .glass {
@@ -317,7 +392,9 @@ html.light #contact textarea:focus {
 /* Premium light Hero backdrop layer (hidden in dark) */
 .hero-light-decor { opacity: 0; transition: opacity 0.5s ease; }
 html.light .hero-light-decor { opacity: 1; }
-html.light .hero-canvas { opacity: 0.38; }
+/* Keep the network canvas at full wrapper opacity in light; its colours are
+   deepened + alpha-boosted inside the component so it stays clearly visible. */
+html.light .hero-canvas { opacity: 1; }
 
 /* ── Keep showcase sections dark in light mode (revert with higher specificity) ── */
 html.light .force-dark {
@@ -333,6 +410,22 @@ html.light .force-dark .text-\[\#CBD5E1\] { color: #CBD5E1 !important; }
 html.light .force-dark .text-\[\#38BDF8\] { color: #38BDF8 !important; }
 html.light .force-dark .text-\[\#A855F7\] { color: #A855F7 !important; }
 html.light .force-dark .text-\[\#34D399\] { color: #34D399 !important; }
+html.light .force-dark .text-\[\#FB923C\] { color: #FB923C !important; }
+html.light .force-dark .text-\[\#F472B6\] { color: #F472B6 !important; }
+html.light .force-dark .text-white\/20    { color: rgba(255, 255, 255, 0.20) !important; }
+html.light .force-dark .text-white\/30    { color: rgba(255, 255, 255, 0.30) !important; }
+html.light .force-dark .from-\[\#38BDF8\] {
+  --tw-gradient-from: #38BDF8 var(--tw-gradient-from-position) !important;
+  --tw-gradient-to: rgb(56 189 248 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to) !important;
+}
+html.light .force-dark .to-\[\#A855F7\] {
+  --tw-gradient-to: #A855F7 var(--tw-gradient-to-position) !important;
+}
+html.light .force-dark .via-\[\#A855F7\] {
+  --tw-gradient-to: rgb(168 85 247 / 0) var(--tw-gradient-to-position) !important;
+  --tw-gradient-stops: var(--tw-gradient-from), #A855F7 var(--tw-gradient-via-position), var(--tw-gradient-to) !important;
+}
 html.light .force-dark .bg-\[\#050816\]   { background-color: #050816 !important; }
 html.light .force-dark .border-\[\#050816\] { border-color: #050816 !important; }
 html.light .force-dark .gradient-text {

@@ -14,6 +14,17 @@ export default function NetworkBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const mouseRef = useRef({ x: -9999, y: -9999 })
   const animRef = useRef<number>(0)
+  const isLightRef = useRef(false)
+
+  // Mirror the active theme into a ref the draw loop can read each frame.
+  useEffect(() => {
+    const el = document.documentElement
+    const sync = () => { isLightRef.current = el.classList.contains('light') }
+    sync()
+    const obs = new MutationObserver(sync)
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -54,6 +65,15 @@ export default function NetworkBackground() {
     const draw = () => {
       ctx.clearRect(0, 0, W, H)
 
+      // Theme-aware palette — deeper, higher-contrast colours on the light Hero
+      const isLight = isLightRef.current
+      const cyan   = isLight ? '2, 132, 199'  : '56, 189, 248'
+      const purple = isLight ? '124, 58, 237' : '168, 85, 247'
+      const lineFactor = isLight ? 0.6 : 0.4
+      const nodeAlpha  = isLight ? 0.8 : 0.6
+      const nodeColor  = isLight ? '#0284C7' : '#38BDF8'
+      const baseLine   = isLight ? 0.7 : 0.5
+
       // Update nodes
       nodes.forEach(node => {
         const dx = mouseRef.current.x - node.x
@@ -88,7 +108,7 @@ export default function NetworkBackground() {
           const dist = Math.sqrt(dx * dx + dy * dy)
 
           if (dist < MAX_DIST) {
-            const opacity = (1 - dist / MAX_DIST) * 0.4
+            const opacity = (1 - dist / MAX_DIST) * lineFactor
 
             // Check mouse proximity for glow
             const mdx = (nodes[i].x + nodes[j].x) / 2 - mouseRef.current.x
@@ -97,14 +117,14 @@ export default function NetworkBackground() {
             const glowFactor = mouseDist < 200 ? (1 - mouseDist / 200) * 2 : 0
 
             const gradient = ctx.createLinearGradient(nodes[i].x, nodes[i].y, nodes[j].x, nodes[j].y)
-            gradient.addColorStop(0, `rgba(56, 189, 248, ${opacity + glowFactor * 0.3})`)
-            gradient.addColorStop(1, `rgba(168, 85, 247, ${opacity + glowFactor * 0.3})`)
+            gradient.addColorStop(0, `rgba(${cyan}, ${opacity + glowFactor * 0.3})`)
+            gradient.addColorStop(1, `rgba(${purple}, ${opacity + glowFactor * 0.3})`)
 
             ctx.beginPath()
             ctx.moveTo(nodes[i].x, nodes[i].y)
             ctx.lineTo(nodes[j].x, nodes[j].y)
             ctx.strokeStyle = gradient
-            ctx.lineWidth = glowFactor > 0 ? 1.5 : 0.5
+            ctx.lineWidth = glowFactor > 0 ? 1.5 : baseLine
             ctx.stroke()
           }
         }
@@ -120,8 +140,8 @@ export default function NetworkBackground() {
 
         if (isNearMouse) {
           const glow = ctx.createRadialGradient(node.x, node.y, 0, node.x, node.y, glowRadius * 4)
-          glow.addColorStop(0, 'rgba(56,189,248,0.4)')
-          glow.addColorStop(1, 'rgba(56,189,248,0)')
+          glow.addColorStop(0, `rgba(${cyan}, ${isLight ? 0.45 : 0.4})`)
+          glow.addColorStop(1, `rgba(${cyan}, 0)`)
           ctx.beginPath()
           ctx.arc(node.x, node.y, glowRadius * 4, 0, Math.PI * 2)
           ctx.fillStyle = glow
@@ -130,7 +150,7 @@ export default function NetworkBackground() {
 
         ctx.beginPath()
         ctx.arc(node.x, node.y, glowRadius, 0, Math.PI * 2)
-        ctx.fillStyle = isNearMouse ? '#38BDF8' : 'rgba(56,189,248,0.6)'
+        ctx.fillStyle = isNearMouse ? nodeColor : `rgba(${cyan}, ${nodeAlpha})`
         ctx.fill()
       })
 

@@ -185,15 +185,17 @@ type HistoryEntry = { command: string; output: OutputLine[] }
 
 // ── Colour map ────────────────────────────────────────────────────────────────
 
+// Values are theme-aware CSS variables (defined in globals.css) so the
+// terminal flips to a light panel with readable syntax colours on toggle.
 const typeColour: Record<OutputLine['type'], string> = {
-  default: '#CBD5E1',
-  success: '#34D399',
-  error:   '#F87171',
-  info:    '#38BDF8',
-  accent:  '#A855F7',
-  muted:   '#64748B',
+  default: 'var(--term-default)',
+  success: 'var(--term-success)',
+  error:   'var(--term-error)',
+  info:    'var(--term-info)',
+  accent:  'var(--term-accent)',
+  muted:   'var(--term-muted)',
   blank:   'transparent',
-  header:  '#F59E0B',
+  header:  'var(--term-header)',
 }
 
 // ── Terminal component ────────────────────────────────────────────────────────
@@ -288,7 +290,7 @@ export default function TerminalSection() {
   const quickCommands = ['help', 'whoami', 'skills', 'experience', 'projects', 'contact']
 
   return (
-    <section id="terminal" ref={sectionRef} className="force-dark section-padding relative overflow-hidden">
+    <section id="terminal" ref={sectionRef} className="section-padding relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">
@@ -338,11 +340,15 @@ export default function TerminalSection() {
           initial={{ opacity: 0, y: 30, scale: 0.97 }}
           animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}}
           transition={{ duration: 0.7, delay: 0.3, ease: [0.76, 0, 0.24, 1] }}
-          className="rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50"
+          className="rounded-2xl overflow-hidden border border-white/10"
+          style={{ boxShadow: 'var(--term-window-shadow)' }}
           onClick={() => inputRef.current?.focus()}
         >
           {/* Title bar */}
-          <div className="flex items-center gap-2 px-4 py-3 bg-[#0d1117] border-b border-white/5 select-none">
+          <div
+            className="flex items-center gap-2 px-4 py-3 border-b border-white/5 select-none"
+            style={{ background: 'var(--term-bar)' }}
+          >
             <div className="flex gap-1.5">
               <div className="w-3 h-3 rounded-full bg-red-500/80 hover:bg-red-500 transition-colors cursor-pointer" />
               <div className="w-3 h-3 rounded-full bg-yellow-500/80 hover:bg-yellow-500 transition-colors cursor-pointer" />
@@ -364,8 +370,8 @@ export default function TerminalSection() {
           {/* Output area */}
           <div
             ref={outputRef}
-            className="bg-[#0d1117] p-4 font-mono text-xs leading-5 min-h-[380px] max-h-[500px] overflow-y-auto cursor-text"
-            style={{ scrollbarWidth: 'thin', scrollbarColor: '#38BDF8 transparent' }}
+            className="p-4 font-mono text-xs leading-5 min-h-[380px] max-h-[500px] overflow-y-auto cursor-text"
+            style={{ background: 'var(--term-bg)', scrollbarWidth: 'thin', scrollbarColor: '#38BDF8 transparent' }}
           >
             <AnimatePresence>
               {history.map((entry, ei) => (
@@ -411,7 +417,10 @@ export default function TerminalSection() {
               <div className="relative flex-1 ml-1">
                 {/* Ghost suggestion */}
                 {suggestion && (
-                  <span className="absolute left-0 top-0 text-white/20 pointer-events-none select-none">
+                  <span
+                    className="absolute left-0 top-0 pointer-events-none select-none"
+                    style={{ color: 'var(--term-ghost)' }}
+                  >
                     {input}
                     <span>{suggestion.slice(input.length)}</span>
                   </span>
@@ -443,7 +452,10 @@ export default function TerminalSection() {
           </div>
 
           {/* Status bar */}
-          <div className="flex items-center justify-between px-4 py-1.5 bg-[#0a0f17] border-t border-white/5 text-[9px] font-mono">
+          <div
+            className="flex items-center justify-between px-4 py-1.5 border-t border-white/5 text-[9px] font-mono"
+            style={{ background: 'var(--term-status)' }}
+          >
             <div className="flex items-center gap-3 text-white/30">
               <span className="text-[#38BDF8]/60">zsh</span>
               <span>UTF-8</span>

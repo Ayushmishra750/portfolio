@@ -1,10 +1,26 @@
 'use client'
 
-import { useRef, useMemo, Suspense } from 'react'
+import { useRef, useMemo, useState, useEffect, Suspense } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Line } from '@react-three/drei'
 import * as THREE from 'three'
 import { motion, useInView } from 'framer-motion'
+
+// ── Theme detection ───────────────────────────────────────────────────────────
+// three.js materials can't read CSS variables, so we mirror the active theme
+// into React state by observing the <html> class the theme toggle flips.
+function useIsLight() {
+  const [light, setLight] = useState(false)
+  useEffect(() => {
+    const el = document.documentElement
+    const sync = () => setLight(el.classList.contains('light'))
+    sync()
+    const obs = new MutationObserver(sync)
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+  return light
+}
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -68,12 +84,13 @@ function ArcParticle({
 }
 
 function Arc({
-  from, to, color, speed,
+  from, to, color, speed, light,
 }: {
   from: THREE.Vector3
   to: THREE.Vector3
   color: string
   speed: number
+  light: boolean
 }) {
   const curve = useMemo(() => {
     const mid = from.clone().add(to).multiplyScalar(0.5)
@@ -85,7 +102,7 @@ function Arc({
 
   return (
     <group>
-      <Line points={points} color={color} transparent opacity={0.22} lineWidth={0.9} />
+      <Line points={points} color={color} transparent opacity={light ? 0.55 : 0.22} lineWidth={light ? 1.3 : 0.9} />
       <ArcParticle curve={curve} color={color} speed={speed} offset={Math.random()} />
       <ArcParticle curve={curve} color={color} speed={speed} offset={(Math.random() + 0.5) % 1} />
     </group>
@@ -132,38 +149,48 @@ function LocationMarker({
   )
 }
 
-function GlobeScene() {
+function GlobeScene({ light }: { light: boolean }) {
   const vectors = useMemo(() => LOCATIONS.map(l => latLngToVec3(l.lat, l.lng)), [])
 
   return (
     <group>
-      {/* Core globe */}
+      {/* Core globe — deep navy in dark, soft pearly blue in light */}
       <mesh>
         <sphereGeometry args={[RADIUS, 72, 72]} />
         <meshPhongMaterial
-          color="#030D1A"
-          emissive="#071527"
-          specular="#1E4D7B"
-          shininess={18}
+          color={light ? '#D8E6F4' : '#030D1A'}
+          emissive={light ? '#BCD2E8' : '#071527'}
+          specular={light ? '#FFFFFF' : '#1E4D7B'}
+          shininess={light ? 26 : 18}
         />
       </mesh>
 
       {/* Latitude / longitude grid */}
       <mesh>
         <sphereGeometry args={[RADIUS * 1.002, 36, 18]} />
-        <meshBasicMaterial color="#38BDF8" wireframe transparent opacity={0.055} />
+        <meshBasicMaterial
+          color={light ? '#2563EB' : '#38BDF8'}
+          wireframe
+          transparent
+          opacity={light ? 0.14 : 0.055}
+        />
       </mesh>
 
       {/* Outer atmosphere glow */}
       <mesh scale={1.12}>
         <sphereGeometry args={[RADIUS, 64, 64]} />
-        <meshBasicMaterial color="#38BDF8" transparent opacity={0.028} side={THREE.BackSide} />
+        <meshBasicMaterial
+          color={light ? '#0EA5E9' : '#38BDF8'}
+          transparent
+          opacity={light ? 0.10 : 0.028}
+          side={THREE.BackSide}
+        />
       </mesh>
 
       {/* Inner rim glow */}
       <mesh scale={1.04}>
         <sphereGeometry args={[RADIUS, 64, 64]} />
-        <meshBasicMaterial color="#0EA5E9" transparent opacity={0.015} side={THREE.BackSide} />
+        <meshBasicMaterial color="#0EA5E9" transparent opacity={light ? 0.05 : 0.015} side={THREE.BackSide} />
       </mesh>
 
       {/* Location markers */}
@@ -179,6 +206,7 @@ function GlobeScene() {
           to={vectors[conn.to]}
           color={conn.color}
           speed={conn.speed}
+          light={light}
         />
       ))}
     </group>
@@ -190,9 +218,10 @@ function GlobeScene() {
 export default function DataGlobe() {
   const ref    = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
+  const light  = useIsLight()
 
   return (
-    <section id="globe" ref={ref} className="force-dark section-padding relative overflow-hidden">
+    <section id="globe" ref={ref} className="section-padding relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
@@ -228,13 +257,13 @@ export default function DataGlobe() {
               style={{ background: 'transparent' }}
               gl={{ antialias: true, alpha: true }}
             >
-              <ambientLight intensity={0.35} />
-              <pointLight position={[10, 10, 10]}  intensity={0.9} color="#38BDF8" />
-              <pointLight position={[-10,-10,-10]} intensity={0.5} color="#A855F7" />
-              <pointLight position={[0, 10, -5]}   intensity={0.3} color="#34D399" />
+              <ambientLight intensity={light ? 0.7 : 0.35} />
+              <pointLight position={[10, 10, 10]}  intensity={light ? 0.55 : 0.9} color={light ? '#0284C7' : '#38BDF8'} />
+              <pointLight position={[-10,-10,-10]} intensity={light ? 0.4 : 0.5} color={light ? '#9333EA' : '#A855F7'} />
+              <pointLight position={[0, 10, -5]}   intensity={light ? 0.3 : 0.3} color={light ? '#059669' : '#34D399'} />
 
               <Suspense fallback={null}>
-                <GlobeScene />
+                <GlobeScene light={light} />
               </Suspense>
 
               <OrbitControls
@@ -248,12 +277,12 @@ export default function DataGlobe() {
               />
             </Canvas>
 
-            {/* Vignette edges */}
+            {/* Vignette edges — fades the globe into the page in either theme */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
                 background:
-                  'radial-gradient(ellipse at 50% 50%, transparent 52%, #050816 80%)',
+                  'radial-gradient(ellipse at 50% 50%, transparent 52%, var(--page-bg) 80%)',
               }}
             />
           </motion.div>

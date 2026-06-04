@@ -131,7 +131,7 @@ export default function DataPipeline() {
   const sel = pipelineStages[selected]
 
   return (
-    <section id="pipeline" ref={ref} className="force-dark section-padding relative overflow-hidden">
+    <section id="pipeline" ref={ref} className="section-padding relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">
@@ -172,8 +172,8 @@ export default function DataPipeline() {
                     <div
                       className="relative glass rounded-2xl p-4 transition-all duration-300"
                       style={{
-                        border: `1px solid ${isActive ? stage.color + '70' : 'rgba(255,255,255,0.07)'}`,
-                        boxShadow: isActive ? `0 0 28px ${stage.color}35` : 'none',
+                        border: `1px solid ${isActive ? stage.color + '70' : 'var(--card-border-rest)'}`,
+                        boxShadow: isActive ? `0 0 28px ${stage.color}35` : 'var(--card-shadow-rest)',
                         transform: isActive ? 'scale(1.06)' : 'scale(1)',
                       }}
                     >
@@ -233,7 +233,7 @@ export default function DataPipeline() {
                     <div className="relative w-6 shrink-0 self-center mt-6 flex items-center" style={{ height: '2px' }}>
                       <div
                         className="w-full h-px transition-colors duration-300"
-                        style={{ background: (active === i || active === i + 1) ? `${stage.color}80` : 'rgba(255,255,255,0.1)' }}
+                        style={{ background: (active === i || active === i + 1) ? `${stage.color}80` : 'var(--surface-line)' }}
                       />
                       {packets.filter(pk => pk.connector === i).map((pk, pi) => (
                         <div key={pi} className="absolute top-1/2" style={{ left: `${pk.progress * 100}%`, transform: 'translate(-50%, -50%)' }}>
@@ -325,7 +325,7 @@ export default function DataPipeline() {
                     className="h-1.5 rounded-full transition-all"
                     style={{
                       width: i === insightIdx ? 18 : 6,
-                      background: i === insightIdx ? ins.color : 'rgba(255,255,255,0.2)',
+                      background: i === insightIdx ? ins.color : 'var(--surface-dot)',
                     }}
                     aria-label={ins.title}
                   />
