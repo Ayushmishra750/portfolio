@@ -134,6 +134,9 @@ body {
   background: radial-gradient(ellipse at 20% 50%, rgba(56,189,248,0.08) 0%, transparent 50%),
               radial-gradient(ellipse at 80% 20%, rgba(168,85,247,0.08) 0%, transparent 50%),
               radial-gradient(ellipse at 50% 80%, rgba(56,189,248,0.05) 0%, transparent 50%);
+  /* background-size MUST come after the shorthand (shorthand resets it) */
+  background-size: 200% 200%;
+  animation: aurora-drift 22s ease-in-out infinite alternate;
 }
 
 /* Magnetic button base */
@@ -172,12 +175,28 @@ body {
   padding: 100px 0;
 }
 
-/* Gradient text */
+/* Gradient text — colours drift across the letters */
 .gradient-text {
-  background: linear-gradient(135deg, #38BDF8, #A855F7);
+  background: linear-gradient(135deg, #38BDF8, #A855F7, #38BDF8, #A855F7);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  /* background-size MUST come after the shorthand (shorthand resets it) */
+  background-size: 300% 100%;
+  animation: text-flow 8s ease-in-out infinite;
+}
+
+/* Aurora drift — slow wandering of the radial blooms */
+@keyframes aurora-drift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 50% 100%; }
+}
+
+/* Text flow — sweeps the multi-stop gradient through the glyphs */
+@keyframes text-flow {
+  0%, 100% { background-position: 0% 50%; }
+  50%      { background-position: 100% 50%; }
 }
 
 /* Animated gradient border for cards */
@@ -288,9 +307,11 @@ html.light .text-white\/30         { color: rgba(15, 23, 42, 0.40) !important; }
 
 /* Headings & big display gradient — deepen so it stays legible on white */
 html.light .gradient-text {
-  background: linear-gradient(135deg, #0284C7, #9333EA);
+  background: linear-gradient(135deg, #0284C7, #9333EA, #0284C7, #9333EA);
   -webkit-background-clip: text;
   background-clip: text;
+  /* re-declare after the shorthand so the flow animation keeps running */
+  background-size: 300% 100%;
 }
 
 /* Brand gradient BUTTONS/LOGOS — deepen the cyan→purple so they read as
@@ -364,6 +385,9 @@ html.light .aurora-bg {
     radial-gradient(ellipse at 18% 28%, rgba(56,189,248,0.10) 0%, transparent 55%),
     radial-gradient(ellipse at 82% 18%, rgba(168,85,247,0.09) 0%, transparent 55%),
     radial-gradient(ellipse at 55% 92%, rgba(52,211,153,0.06) 0%, transparent 55%);
+  /* keep the gentle drift on the light bloom too */
+  background-size: 200% 200%;
+  animation: aurora-drift 22s ease-in-out infinite alternate;
 }
 html.light ::-webkit-scrollbar-track { background: #E2E8F0; }
 html.light ::selection { background: rgba(2,132,199,0.18); color: #0F172A; }
@@ -429,9 +453,10 @@ html.light .force-dark .via-\[\#A855F7\] {
 html.light .force-dark .bg-\[\#050816\]   { background-color: #050816 !important; }
 html.light .force-dark .border-\[\#050816\] { border-color: #050816 !important; }
 html.light .force-dark .gradient-text {
-  background: linear-gradient(135deg, #38BDF8, #A855F7);
+  background: linear-gradient(135deg, #38BDF8, #A855F7, #38BDF8, #A855F7);
   -webkit-background-clip: text;
   background-clip: text;
+  background-size: 300% 100%;
 }
 html.light .force-dark .glass {
   background: rgba(255, 255, 255, 0.05) !important;
@@ -471,7 +496,9 @@ html.light .force-dark .hover\:bg-white\/\[0\.07\]:hover { background-color: rgb
   .shimmer-text,
   .float-1,
   .float-2,
-  .float-3 {
+  .float-3,
+  .aurora-bg,
+  .gradient-text {
     animation: none !important;
   }
 }
