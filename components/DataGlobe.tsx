@@ -137,97 +137,175 @@ function Arc({
   )
 }
 
-// ── Country borders ─────────────────────────────────────────────────────────
-// Real national borders for every country, fetched at runtime and projected
-// onto the sphere as glowing line segments. Falls back silently (the base
-// globe + grid still render) if the dataset can't be reached.
+// ── World geography ───────────────────────────────────────────────────────────
+// One GeoJSON of every country is fetched once and used two ways: its polygon
+// edges become glowing coastlines, and a fine grid sampled inside the polygons
+// fills each continent. Falls back silently (sphere + graticule still render).
 const BORDERS_URL =
   'https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json'
 
-// Borders are tinted with the same accent palette the data sections use,
-// cycling per-country for a vibrant multi-colour map (no flat white outline).
-const BORDER_PALETTE = ['#38BDF8', '#A855F7', '#34D399', '#FB923C', '#F472B6']
+// Warm palette for the hologram-style globe (matches the reference image).
+const LAND_GOLD  = '#F5C24A' // continent fill grid
+const COAST_GOLD = '#FFDC8A' // crisp coastlines
+const GRID_GOLD  = '#B8923F' // faint graticule
 
-function CountryBorders({ light }: { light: boolean }) {
-  const [data, setData] = useState<{
-    pts: [number, number, number][]
-    colors: [number, number, number][]
-  } | null>(null)
+// Ray-casting point-in-ring test in lng/lat space.
+function pointInRing(lng: number, lat: number, ring: number[][]): boolean {
+  let inside = false
+  for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+    const xi = ring[i][0], yi = ring[i][1]
+    const xj = ring[j][0], yj = ring[j][1]
+    if (((yi > lat) !== (yj > lat)) && lng < ((xj - xi) * (lat - yi)) / (yj - yi) + xi) {
+      inside = !inside
+    }
+  }
+  return inside
+}
+
+type LandPoly = { minLng: number; minLat: number; maxLng: number; maxLat: number; rings: number[][][] }
+
+// The whole world: coastlines (polygon edges) + a fine grid of points sampled
+// inside every landmass — the glowing "grid mesh" continents from the reference.
+function World() {
+  const [geo, setGeo] = useState<{ land: Float32Array; coast: Float32Array } | null>(null)
 
   useEffect(() => {
     let cancelled = false
-    const R = RADIUS * 1.004 // lift borders just above the surface (no z-fight)
-    const palette = BORDER_PALETTE.map(h => new THREE.Color(h))
+    const Rc = RADIUS * 1.004 // coastlines sit just above the surface
+    const Rl = RADIUS * 1.001 // land dots hug the surface
 
     fetch(BORDERS_URL)
       .then(r => r.json())
-      .then((geo: { features?: Array<{ geometry?: { type: string; coordinates: number[][][] | number[][][][] } }> }) => {
-        if (cancelled || !geo?.features) return
-        const pts: [number, number, number][] = []
-        const colors: [number, number, number][] = []
+      .then((data: { features?: Array<{ geometry?: { type: string; coordinates: number[][][] | number[][][][] } }> }) => {
+        if (cancelled || !data?.features) return
 
-        // Each ring is a closed loop of [lng, lat]; emit it as point pairs with a
-        // matching per-vertex colour so one LineSegments draws every edge.
-        const addRing = (ring: number[][], c: THREE.Color) => {
+        const coast: number[] = []
+        const polys: LandPoly[] = []
+
+        const addCoast = (ring: number[][]) => {
           for (let i = 0; i < ring.length - 1; i++) {
-            const a = latLngToVec3(ring[i][1], ring[i][0], R)
-            const b = latLngToVec3(ring[i + 1][1], ring[i + 1][0], R)
-            pts.push([a.x, a.y, a.z], [b.x, b.y, b.z])
-            colors.push([c.r, c.g, c.b], [c.r, c.g, c.b])
+            const a = latLngToVec3(ring[i][1], ring[i][0], Rc)
+            const b = latLngToVec3(ring[i + 1][1], ring[i + 1][0], Rc)
+            coast.push(a.x, a.y, a.z, b.x, b.y, b.z)
           }
         }
+        const addPoly = (rings: number[][][]) => {
+          rings.forEach(addCoast)
+          const outer = rings[0]
+          let minLng = 180, minLat = 90, maxLng = -180, maxLat = -90
+          for (const p of outer) {
+            if (p[0] < minLng) minLng = p[0]
+            if (p[0] > maxLng) maxLng = p[0]
+            if (p[1] < minLat) minLat = p[1]
+            if (p[1] > maxLat) maxLat = p[1]
+          }
+          polys.push({ minLng, minLat, maxLng, maxLat, rings })
+        }
 
-        let ci = 0
-        for (const f of geo.features) {
+        for (const f of data.features) {
           const g = f?.geometry
           if (!g) continue
-          const c = palette[ci++ % palette.length] // a different accent per country
-          if (g.type === 'Polygon') {
-            ;(g.coordinates as number[][][]).forEach(r => addRing(r, c))
-          } else if (g.type === 'MultiPolygon') {
-            ;(g.coordinates as number[][][][]).forEach(poly => poly.forEach(r => addRing(r, c)))
+          if (g.type === 'Polygon') addPoly(g.coordinates as number[][][])
+          else if (g.type === 'MultiPolygon') (g.coordinates as number[][][][]).forEach(addPoly)
+        }
+
+        // Sample a fine lat/lng grid; keep points inside land (outer ring, not a hole).
+        const land: number[] = []
+        const STEP = 1.4
+        for (let lat = -84; lat <= 84; lat += STEP) {
+          for (let lng = -180; lng < 180; lng += STEP) {
+            for (const p of polys) {
+              if (lng < p.minLng || lng > p.maxLng || lat < p.minLat || lat > p.maxLat) continue
+              if (!pointInRing(lng, lat, p.rings[0])) continue
+              let hole = false
+              for (let k = 1; k < p.rings.length; k++) {
+                if (pointInRing(lng, lat, p.rings[k])) { hole = true; break }
+              }
+              if (!hole) {
+                const v = latLngToVec3(lat, lng, Rl)
+                land.push(v.x, v.y, v.z)
+                break
+              }
+            }
           }
         }
-        if (!cancelled) setData({ pts, colors })
+
+        if (!cancelled) setGeo({ land: new Float32Array(land), coast: new Float32Array(coast) })
       })
-      .catch(() => {/* offline → keep the base globe */})
+      .catch(() => {/* offline → sphere + graticule still render */})
 
     return () => { cancelled = true }
   }, [])
 
-  if (!data) return null
-
-  // Thin, minimal outline + a soft same-colour glow. Additive in dark for a
-  // neon bloom; normal blend in light so the colours stay crisp on the pale globe.
-  const blend = light ? THREE.NormalBlending : THREE.AdditiveBlending
+  if (!geo) return null
 
   return (
     <group>
-      {/* Soft colour glow — kept subtle so the outline stays minimal */}
-      <Line
-        points={data.pts}
-        segments
-        color="#ffffff"
-        vertexColors={data.colors}
-        lineWidth={light ? 1.8 : 2.2}
-        transparent
-        opacity={light ? 0.14 : 0.18}
-        depthWrite={false}
-        blending={blend}
-      />
-      {/* Very thin crisp core */}
-      <Line
-        points={data.pts}
-        segments
-        color="#ffffff"
-        vertexColors={data.colors}
-        lineWidth={1}
-        transparent
-        opacity={light ? 0.95 : 0.9}
-        depthWrite={false}
-        blending={blend}
-      />
+      {/* Continent fill — a glowing grid of points inside every landmass */}
+      <points>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.land, 3]} />
+        </bufferGeometry>
+        <pointsMaterial
+          color={LAND_GOLD}
+          size={0.021}
+          sizeAttenuation
+          transparent
+          opacity={0.92}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </points>
+
+      {/* Crisp glowing coastlines */}
+      <lineSegments>
+        <bufferGeometry>
+          <bufferAttribute attach="attributes-position" args={[geo.coast, 3]} />
+        </bufferGeometry>
+        <lineBasicMaterial
+          color={COAST_GOLD}
+          transparent
+          opacity={0.85}
+          blending={THREE.AdditiveBlending}
+          depthWrite={false}
+        />
+      </lineSegments>
     </group>
+  )
+}
+
+// Full lat/long graticule — clean meridians + parallels, faint gold.
+function Graticule() {
+  const positions = useMemo(() => {
+    const seg: number[] = []
+    const R = RADIUS * 1.0015
+    const push = (a: THREE.Vector3, b: THREE.Vector3) => seg.push(a.x, a.y, a.z, b.x, b.y, b.z)
+    for (let lat = -75; lat <= 75; lat += 15) {
+      let prev: THREE.Vector3 | null = null
+      for (let lng = -180; lng <= 180; lng += 4) {
+        const v = latLngToVec3(lat, lng, R)
+        if (prev) push(prev, v)
+        prev = v
+      }
+    }
+    for (let lng = -180; lng < 180; lng += 15) {
+      let prev: THREE.Vector3 | null = null
+      for (let lat = -90; lat <= 90; lat += 4) {
+        const v = latLngToVec3(lat, lng, R)
+        if (prev) push(prev, v)
+        prev = v
+      }
+    }
+    return new Float32Array(seg)
+  }, [])
+
+  return (
+    <lineSegments>
+      <bufferGeometry>
+        <bufferAttribute attach="attributes-position" args={[positions, 3]} />
+      </bufferGeometry>
+      <lineBasicMaterial color={GRID_GOLD} transparent opacity={0.22} blending={THREE.AdditiveBlending} depthWrite={false} />
+    </lineSegments>
   )
 }
 
@@ -256,27 +334,27 @@ const ATMO_FRAG = `
   }
 `
 
-function Atmosphere({ light }: { light: boolean }) {
+function Atmosphere() {
   const mat = useMemo(
     () =>
       new THREE.ShaderMaterial({
         uniforms: {
-          uColor:     { value: new THREE.Color(light ? '#1D6FE0' : '#38BDF8') },
-          uPower:     { value: light ? 3.2 : 2.4 },
-          uIntensity: { value: light ? 0.55 : 1.05 },
+          uColor:     { value: new THREE.Color('#F5C24A') }, // warm amber rim
+          uPower:     { value: 2.6 },
+          uIntensity: { value: 1.0 },
         },
         vertexShader: ATMO_VERT,
         fragmentShader: ATMO_FRAG,
         transparent: true,
         side: THREE.BackSide,
         depthWrite: false,
-        blending: light ? THREE.NormalBlending : THREE.AdditiveBlending,
+        blending: THREE.AdditiveBlending,
       }),
-    [light]
+    []
   )
 
   return (
-    <mesh scale={1.18}>
+    <mesh scale={1.16}>
       <sphereGeometry args={[RADIUS, 64, 64]} />
       <primitive object={mat} attach="material" />
     </mesh>
@@ -328,50 +406,20 @@ function GlobeScene({ light }: { light: boolean }) {
 
   return (
     <group>
-      {/* Core globe — deep navy in dark, soft pearly blue in light */}
+      {/* Dark glossy sphere — the unlit "ocean" the gold land glows against */}
       <mesh>
         <sphereGeometry args={[RADIUS, 96, 96]} />
-        <meshPhongMaterial
-          color={light ? '#DCE9F6' : '#02101F'}
-          emissive={light ? '#C2D7EC' : '#06182C'}
-          specular={light ? '#FFFFFF' : '#1E4D7B'}
-          shininess={light ? 26 : 16}
-        />
+        <meshPhongMaterial color="#070708" emissive="#0C0A06" specular="#5A4A22" shininess={32} />
       </mesh>
 
-      {/* Latitude / longitude graticule — kept subtle so borders lead */}
-      <mesh>
-        <sphereGeometry args={[RADIUS * 1.002, 48, 24]} />
-        <meshBasicMaterial
-          color={light ? '#2563EB' : '#38BDF8'}
-          wireframe
-          transparent
-          opacity={light ? 0.08 : 0.04}
-        />
-      </mesh>
+      {/* Faint gold graticule */}
+      <Graticule />
 
-      {/* Every country's borders */}
-      <CountryBorders light={light} />
+      {/* Glowing grid continents + crisp coastlines */}
+      <World />
 
-      {/* Fresnel rim glow */}
-      <Atmosphere light={light} />
-
-      {/* Outer atmosphere glow */}
-      <mesh scale={1.12}>
-        <sphereGeometry args={[RADIUS, 64, 64]} />
-        <meshBasicMaterial
-          color={light ? '#0EA5E9' : '#38BDF8'}
-          transparent
-          opacity={light ? 0.10 : 0.028}
-          side={THREE.BackSide}
-        />
-      </mesh>
-
-      {/* Inner rim glow */}
-      <mesh scale={1.04}>
-        <sphereGeometry args={[RADIUS, 64, 64]} />
-        <meshBasicMaterial color="#0EA5E9" transparent opacity={light ? 0.05 : 0.015} side={THREE.BackSide} />
-      </mesh>
+      {/* Amber fresnel rim glow */}
+      <Atmosphere />
 
       {/* Location markers */}
       {LOCATIONS.map((loc, i) => (
@@ -432,15 +480,24 @@ export default function DataGlobe() {
             transition={{ duration: 0.9, delay: 0.2, ease: [0.34, 1.56, 0.64, 1] }}
             className="relative h-[420px] md:h-[520px]"
           >
+            {/* Dark "space" backdrop so the gold hologram globe reads as
+                intentional in both light and dark themes */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                zIndex: 0,
+                background:
+                  'radial-gradient(circle at 50% 46%, rgba(6,7,15,0.97) 0%, rgba(6,7,15,0.9) 38%, rgba(6,7,15,0) 72%)',
+              }}
+            />
             <Canvas
               camera={{ position: [0, 0, 4.8], fov: 42 }}
-              style={{ background: 'transparent' }}
+              style={{ background: 'transparent', position: 'relative', zIndex: 1 }}
               gl={{ antialias: true, alpha: true }}
             >
-              <ambientLight intensity={light ? 0.7 : 0.35} />
-              <pointLight position={[10, 10, 10]}  intensity={light ? 0.55 : 0.9} color={light ? '#0284C7' : '#38BDF8'} />
-              <pointLight position={[-10,-10,-10]} intensity={light ? 0.4 : 0.5} color={light ? '#9333EA' : '#A855F7'} />
-              <pointLight position={[0, 10, -5]}   intensity={light ? 0.3 : 0.3} color={light ? '#059669' : '#34D399'} />
+              <ambientLight intensity={0.32} />
+              <pointLight position={[6, 8, 8]}    intensity={1.1}  color="#FFE7BE" />
+              <pointLight position={[-8, -4, -6]} intensity={0.35} color="#FFB870" />
 
               <Suspense fallback={null}>
                 <GlobeScene light={light} />
@@ -457,12 +514,13 @@ export default function DataGlobe() {
               />
             </Canvas>
 
-            {/* Vignette edges — fades the globe into the page in either theme */}
+            {/* Soft edge feather into the page */}
             <div
               className="absolute inset-0 pointer-events-none"
               style={{
+                zIndex: 2,
                 background:
-                  'radial-gradient(ellipse at 50% 50%, transparent 52%, var(--page-bg) 80%)',
+                  'radial-gradient(ellipse at 50% 50%, transparent 68%, var(--page-bg) 92%)',
               }}
             />
           </motion.div>
