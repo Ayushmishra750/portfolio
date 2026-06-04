@@ -136,7 +136,7 @@ export default function Hero() {
             View Projects
           </MagneticButton>
 
-          <MagneticButton href="https://docs.google.com/document/d/1pbQnCUzpNPuwZvFnLyztp4q_3kML02F8_r1PK2urMNQ/export?format=pdf" target="_blank">
+          <MagneticButton href="/resume.pdf" download="Ayush_Mishra_Resume.pdf" target="_blank">
             <Download className="w-4 h-4" />
             Download Resume
           </MagneticButton>
