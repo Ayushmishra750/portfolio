@@ -109,6 +109,141 @@ function Arc({
   )
 }
 
+// ── Country borders ─────────────────────────────────────────────────────────
+// Real national borders for every country, fetched at runtime and projected
+// onto the sphere as glowing line segments. Falls back silently (the base
+// globe + grid still render) if the dataset can't be reached.
+const BORDERS_URL =
+  'https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json'
+
+function CountryBorders({ light }: { light: boolean }) {
+  const [pts, setPts] = useState<[number, number, number][] | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    const R = RADIUS * 1.004 // lift borders just above the surface (no z-fight)
+
+    fetch(BORDERS_URL)
+      .then(r => r.json())
+      .then((geo: { features?: Array<{ geometry?: { type: string; coordinates: number[][][] | number[][][][] } }> }) => {
+        if (cancelled || !geo?.features) return
+        const out: [number, number, number][] = []
+
+        // Each ring is a closed loop of [lng, lat]; emit it as point pairs so
+        // a single LineSegments draws every edge in one go.
+        const addRing = (ring: number[][]) => {
+          for (let i = 0; i < ring.length - 1; i++) {
+            const a = latLngToVec3(ring[i][1], ring[i][0], R)
+            const b = latLngToVec3(ring[i + 1][1], ring[i + 1][0], R)
+            out.push([a.x, a.y, a.z], [b.x, b.y, b.z])
+          }
+        }
+
+        for (const f of geo.features) {
+          const g = f?.geometry
+          if (!g) continue
+          if (g.type === 'Polygon') {
+            ;(g.coordinates as number[][][]).forEach(addRing)
+          } else if (g.type === 'MultiPolygon') {
+            ;(g.coordinates as number[][][][]).forEach(poly => poly.forEach(addRing))
+          }
+        }
+        if (!cancelled) setPts(out)
+      })
+      .catch(() => {/* offline → keep the base globe */})
+
+    return () => { cancelled = true }
+  }, [])
+
+  if (!pts) return null
+
+  // Dark: neon cyan with additive glow on the deep sphere.
+  // Light: deep navy borders with a soft blue halo (normal blend so they read
+  //        as crisp lines on the pale globe rather than washing out).
+  const glow    = light ? '#2563EB' : '#38BDF8'
+  const crisp   = light ? '#0B4FA8' : '#7DD3FC'
+  const blend   = light ? THREE.NormalBlending : THREE.AdditiveBlending
+
+  return (
+    <group>
+      {/* Soft halo pass */}
+      <Line
+        points={pts}
+        segments
+        color={glow}
+        lineWidth={light ? 2.4 : 3.0}
+        transparent
+        opacity={light ? 0.22 : 0.14}
+        depthWrite={false}
+        blending={blend}
+      />
+      {/* Crisp core pass */}
+      <Line
+        points={pts}
+        segments
+        color={crisp}
+        lineWidth={1}
+        transparent
+        opacity={light ? 0.95 : 0.78}
+        depthWrite={false}
+        blending={blend}
+      />
+    </group>
+  )
+}
+
+// ── Fresnel atmosphere ────────────────────────────────────────────────────────
+// A back-faced shell whose rim glows brightest at the silhouette edge — the
+// classic "glowing planet" halo. Additive in dark for drama; gentle in light.
+const ATMO_VERT = `
+  varying vec3 vNormal;
+  varying vec3 vView;
+  void main() {
+    vec4 mv = modelViewMatrix * vec4(position, 1.0);
+    vNormal = normalize(normalMatrix * normal);
+    vView   = normalize(-mv.xyz);
+    gl_Position = projectionMatrix * mv;
+  }
+`
+const ATMO_FRAG = `
+  varying vec3 vNormal;
+  varying vec3 vView;
+  uniform vec3  uColor;
+  uniform float uPower;
+  uniform float uIntensity;
+  void main() {
+    float fres = pow(1.0 - abs(dot(vNormal, vView)), uPower);
+    gl_FragColor = vec4(uColor, fres * uIntensity);
+  }
+`
+
+function Atmosphere({ light }: { light: boolean }) {
+  const mat = useMemo(
+    () =>
+      new THREE.ShaderMaterial({
+        uniforms: {
+          uColor:     { value: new THREE.Color(light ? '#1D6FE0' : '#38BDF8') },
+          uPower:     { value: light ? 3.2 : 2.4 },
+          uIntensity: { value: light ? 0.55 : 1.05 },
+        },
+        vertexShader: ATMO_VERT,
+        fragmentShader: ATMO_FRAG,
+        transparent: true,
+        side: THREE.BackSide,
+        depthWrite: false,
+        blending: light ? THREE.NormalBlending : THREE.AdditiveBlending,
+      }),
+    [light]
+  )
+
+  return (
+    <mesh scale={1.18}>
+      <sphereGeometry args={[RADIUS, 64, 64]} />
+      <primitive object={mat} attach="material" />
+    </mesh>
+  )
+}
+
 function LocationMarker({
   lat, lng, color, size, primary,
 }: {
@@ -156,25 +291,31 @@ function GlobeScene({ light }: { light: boolean }) {
     <group>
       {/* Core globe — deep navy in dark, soft pearly blue in light */}
       <mesh>
-        <sphereGeometry args={[RADIUS, 72, 72]} />
+        <sphereGeometry args={[RADIUS, 96, 96]} />
         <meshPhongMaterial
-          color={light ? '#D8E6F4' : '#030D1A'}
-          emissive={light ? '#BCD2E8' : '#071527'}
+          color={light ? '#DCE9F6' : '#02101F'}
+          emissive={light ? '#C2D7EC' : '#06182C'}
           specular={light ? '#FFFFFF' : '#1E4D7B'}
-          shininess={light ? 26 : 18}
+          shininess={light ? 26 : 16}
         />
       </mesh>
 
-      {/* Latitude / longitude grid */}
+      {/* Latitude / longitude graticule — kept subtle so borders lead */}
       <mesh>
-        <sphereGeometry args={[RADIUS * 1.002, 36, 18]} />
+        <sphereGeometry args={[RADIUS * 1.002, 48, 24]} />
         <meshBasicMaterial
           color={light ? '#2563EB' : '#38BDF8'}
           wireframe
           transparent
-          opacity={light ? 0.14 : 0.055}
+          opacity={light ? 0.08 : 0.04}
         />
       </mesh>
+
+      {/* Every country's borders */}
+      <CountryBorders light={light} />
+
+      {/* Fresnel rim glow */}
+      <Atmosphere light={light} />
 
       {/* Outer atmosphere glow */}
       <mesh scale={1.12}>
@@ -239,8 +380,8 @@ export default function DataGlobe() {
             Data Flows <span className="gradient-text">Worldwide</span>
           </h2>
           <p className="text-[#94A3B8] max-w-xl mx-auto">
-            Real-time pipelines connecting AWS regions across the globe.
-            Drag to explore.
+            Every country mapped, with real-time pipelines connecting AWS
+            regions across the globe. Drag to explore.
           </p>
         </motion.div>
 
@@ -334,7 +475,7 @@ export default function DataGlobe() {
               className="glass rounded-2xl p-5 mt-4 border border-white/5 space-y-3"
             >
               {[
-                { label: 'Active connections',  value: `${CONNECTIONS.length}`,  color: '#38BDF8' },
+                { label: 'Countries mapped',    value: '195',                    color: '#38BDF8' },
                 { label: 'Data packets / sec',  value: '12.4K',                  color: '#34D399' },
                 { label: 'Regions covered',     value: `${LOCATIONS.length}`,    color: '#A855F7' },
                 { label: 'Avg latency',         value: '< 2 ms',                 color: '#FB923C' },
