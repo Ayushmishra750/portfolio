@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import ThemeToggle from './ThemeToggle'
 
 const links = [
   { label: 'About', href: '#about' },
@@ -105,6 +106,7 @@ export default function Navbar() {
 
           {/* CTA */}
           <div className="flex items-center gap-3">
+            <ThemeToggle />
             <motion.a
               href="mailto:ayushmishra750980@gmail.com"
               className="hidden md:flex items-center gap-2 px-4 py-2 text-sm font-medium text-[#050816] bg-gradient-to-r from-[#38BDF8] to-[#A855F7] rounded-lg hover:opacity-90 transition-opacity"

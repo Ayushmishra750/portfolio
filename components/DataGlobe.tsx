@@ -192,7 +192,7 @@ export default function DataGlobe() {
   const inView = useInView(ref, { once: true, margin: '-100px' })
 
   return (
-    <section id="globe" ref={ref} className="section-padding relative overflow-hidden">
+    <section id="globe" ref={ref} className="force-dark section-padding relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <div className="max-w-6xl mx-auto px-6 relative z-10">

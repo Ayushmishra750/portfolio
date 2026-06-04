@@ -39,7 +39,7 @@ export default function Hero() {
   }
 
   return (
-    <section id="hero" ref={containerRef} className="relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-16 md:pt-0 md:pb-0">
+    <section id="hero" ref={containerRef} className="force-dark relative min-h-screen flex items-center justify-center overflow-hidden pt-28 pb-16 md:pt-0 md:pb-0">
       {/* 3D Network Background */}
       <div className="absolute inset-0">
         <NetworkBackground />

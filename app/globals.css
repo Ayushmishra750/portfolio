@@ -182,6 +182,87 @@ body {
   font-family: 'JetBrains Mono', monospace;
 }
 
+/* ─────────────────────────────────────────────────────────────────────────────
+   Light theme
+   Default (no .light class) stays fully dark — zero regression.
+   In light mode we flip content surfaces/text, while "force-dark" showcase
+   sections (Hero, Globe, Live Telemetry, Terminal, Loader) stay dark.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+/* Smooth theme transition */
+body { transition: background-color 0.4s ease, color 0.4s ease; }
+.glass, .glass-strong { transition: background-color 0.4s ease, border-color 0.4s ease; }
+
+html.light body {
+  background: #F1F5F9;
+  color: #0F172A;
+}
+
+/* Surfaces & text */
+html.light .bg-\[\#050816\]        { background-color: #F1F5F9 !important; }
+html.light .text-white             { color: #0F172A !important; }
+html.light .text-\[\#94A3B8\]      { color: #475569 !important; }
+html.light .text-\[\#CBD5E1\]      { color: #334155 !important; }
+html.light .text-\[\#64748B\]      { color: #64748B !important; }
+
+/* Glass */
+html.light .glass {
+  background: rgba(15, 23, 42, 0.04);
+  border-color: rgba(15, 23, 42, 0.10);
+}
+html.light .glass-strong {
+  background: rgba(255, 255, 255, 0.70);
+  border-color: rgba(15, 23, 42, 0.10);
+}
+
+/* White tints → dark tints (base surfaces) */
+html.light .bg-white\/5,
+html.light .bg-white\/10,
+html.light .bg-white\/20,
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.08\]   { background-color: rgba(15, 23, 42, 0.05) !important; }
+
+/* Hover feedback in light mode */
+html.light .hover\:bg-white\/\[0\.07\]:hover,
+html.light .hover\:bg-white\/5:hover { background-color: rgba(15, 23, 42, 0.07) !important; }
+
+/* Borders */
+html.light .border-white\/5,
+html.light .border-white\/10,
+html.light .border-white\/15,
+html.light .border-white\/20,
+html.light .border-white\/40      { border-color: rgba(15, 23, 42, 0.10) !important; }
+
+/* Soften aurora & scrollbar on light */
+html.light .aurora-bg { opacity: 0.55; }
+html.light ::-webkit-scrollbar-track { background: #E2E8F0; }
+
+/* ── Keep showcase sections dark in light mode (revert with higher specificity) ── */
+html.light .force-dark              { background-color: #050816 !important; }
+html.light .force-dark .text-white  { color: #FFFFFF !important; }
+html.light .force-dark .text-\[\#94A3B8\] { color: #94A3B8 !important; }
+html.light .force-dark .text-\[\#CBD5E1\] { color: #CBD5E1 !important; }
+html.light .force-dark .bg-\[\#050816\]   { background-color: #050816 !important; }
+html.light .force-dark .glass {
+  background: rgba(255, 255, 255, 0.05) !important;
+  border-color: rgba(255, 255, 255, 0.10) !important;
+}
+html.light .force-dark .glass-strong {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.15) !important;
+}
+html.light .force-dark .bg-white\/5,
+html.light .force-dark .bg-white\/10,
+html.light .force-dark .bg-white\/20,
+html.light .force-dark .bg-white\/\[0\.03\],
+html.light .force-dark .bg-white\/\[0\.08\] { background-color: rgba(255, 255, 255, 0.05) !important; }
+html.light .force-dark .border-white\/5,
+html.light .force-dark .border-white\/10,
+html.light .force-dark .border-white\/15,
+html.light .force-dark .border-white\/20,
+html.light .force-dark .border-white\/40 { border-color: rgba(255, 255, 255, 0.10) !important; }
+html.light .force-dark .hover\:bg-white\/\[0\.07\]:hover { background-color: rgba(255, 255, 255, 0.07) !important; }
+
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
   html {
