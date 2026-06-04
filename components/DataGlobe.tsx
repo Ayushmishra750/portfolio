@@ -67,7 +67,7 @@ function ArcParticle({
   speed: number
   offset: number
 }) {
-  const ref = useRef<THREE.Mesh>(null)
+  const ref = useRef<THREE.Group>(null)
   const t   = useRef(offset)
 
   useFrame((_, delta) => {
@@ -76,10 +76,18 @@ function ArcParticle({
   })
 
   return (
-    <mesh ref={ref}>
-      <sphereGeometry args={[0.022, 8, 8]} />
-      <meshBasicMaterial color={color} />
-    </mesh>
+    <group ref={ref}>
+      {/* Bright comet core */}
+      <mesh>
+        <sphereGeometry args={[0.03, 10, 10]} />
+        <meshBasicMaterial color={color} />
+      </mesh>
+      {/* Additive glow around it */}
+      <mesh>
+        <sphereGeometry args={[0.065, 10, 10]} />
+        <meshBasicMaterial color={color} transparent opacity={0.3} blending={THREE.AdditiveBlending} depthWrite={false} />
+      </mesh>
+    </group>
   )
 }
 
@@ -99,10 +107,30 @@ function Arc({
   }, [from, to])
 
   const points = useMemo(() => curve.getPoints(80), [curve])
+  const blend  = light ? THREE.NormalBlending : THREE.AdditiveBlending
 
   return (
     <group>
-      <Line points={points} color={color} transparent opacity={light ? 0.55 : 0.22} lineWidth={light ? 1.3 : 0.9} />
+      {/* Soft wide glow beneath the flow line */}
+      <Line
+        points={points}
+        color={color}
+        transparent
+        opacity={light ? 0.22 : 0.3}
+        lineWidth={light ? 5 : 6}
+        depthWrite={false}
+        blending={blend}
+      />
+      {/* Bright, thicker core — the highlighted data flow */}
+      <Line
+        points={points}
+        color={color}
+        transparent
+        opacity={light ? 0.95 : 0.85}
+        lineWidth={light ? 2.2 : 2.6}
+        depthWrite={false}
+        blending={blend}
+      />
       <ArcParticle curve={curve} color={color} speed={speed} offset={Math.random()} />
       <ArcParticle curve={curve} color={color} speed={speed} offset={(Math.random() + 0.5) % 1} />
     </group>
@@ -116,75 +144,86 @@ function Arc({
 const BORDERS_URL =
   'https://cdn.jsdelivr.net/gh/johan/world.geo.json@master/countries.geo.json'
 
+// Borders are tinted with the same accent palette the data sections use,
+// cycling per-country for a vibrant multi-colour map (no flat white outline).
+const BORDER_PALETTE = ['#38BDF8', '#A855F7', '#34D399', '#FB923C', '#F472B6']
+
 function CountryBorders({ light }: { light: boolean }) {
-  const [pts, setPts] = useState<[number, number, number][] | null>(null)
+  const [data, setData] = useState<{
+    pts: [number, number, number][]
+    colors: [number, number, number][]
+  } | null>(null)
 
   useEffect(() => {
     let cancelled = false
     const R = RADIUS * 1.004 // lift borders just above the surface (no z-fight)
+    const palette = BORDER_PALETTE.map(h => new THREE.Color(h))
 
     fetch(BORDERS_URL)
       .then(r => r.json())
       .then((geo: { features?: Array<{ geometry?: { type: string; coordinates: number[][][] | number[][][][] } }> }) => {
         if (cancelled || !geo?.features) return
-        const out: [number, number, number][] = []
+        const pts: [number, number, number][] = []
+        const colors: [number, number, number][] = []
 
-        // Each ring is a closed loop of [lng, lat]; emit it as point pairs so
-        // a single LineSegments draws every edge in one go.
-        const addRing = (ring: number[][]) => {
+        // Each ring is a closed loop of [lng, lat]; emit it as point pairs with a
+        // matching per-vertex colour so one LineSegments draws every edge.
+        const addRing = (ring: number[][], c: THREE.Color) => {
           for (let i = 0; i < ring.length - 1; i++) {
             const a = latLngToVec3(ring[i][1], ring[i][0], R)
             const b = latLngToVec3(ring[i + 1][1], ring[i + 1][0], R)
-            out.push([a.x, a.y, a.z], [b.x, b.y, b.z])
+            pts.push([a.x, a.y, a.z], [b.x, b.y, b.z])
+            colors.push([c.r, c.g, c.b], [c.r, c.g, c.b])
           }
         }
 
+        let ci = 0
         for (const f of geo.features) {
           const g = f?.geometry
           if (!g) continue
+          const c = palette[ci++ % palette.length] // a different accent per country
           if (g.type === 'Polygon') {
-            ;(g.coordinates as number[][][]).forEach(addRing)
+            ;(g.coordinates as number[][][]).forEach(r => addRing(r, c))
           } else if (g.type === 'MultiPolygon') {
-            ;(g.coordinates as number[][][][]).forEach(poly => poly.forEach(addRing))
+            ;(g.coordinates as number[][][][]).forEach(poly => poly.forEach(r => addRing(r, c)))
           }
         }
-        if (!cancelled) setPts(out)
+        if (!cancelled) setData({ pts, colors })
       })
       .catch(() => {/* offline → keep the base globe */})
 
     return () => { cancelled = true }
   }, [])
 
-  if (!pts) return null
+  if (!data) return null
 
-  // Dark: neon cyan with additive glow on the deep sphere.
-  // Light: deep navy borders with a soft blue halo (normal blend so they read
-  //        as crisp lines on the pale globe rather than washing out).
-  const glow    = light ? '#2563EB' : '#38BDF8'
-  const crisp   = light ? '#0B4FA8' : '#7DD3FC'
-  const blend   = light ? THREE.NormalBlending : THREE.AdditiveBlending
+  // Thin, minimal outline + a soft same-colour glow. Additive in dark for a
+  // neon bloom; normal blend in light so the colours stay crisp on the pale globe.
+  const blend = light ? THREE.NormalBlending : THREE.AdditiveBlending
 
   return (
     <group>
-      {/* Soft halo pass */}
+      {/* Soft colour glow — kept subtle so the outline stays minimal */}
       <Line
-        points={pts}
+        points={data.pts}
         segments
-        color={glow}
-        lineWidth={light ? 2.4 : 3.0}
+        color="#ffffff"
+        vertexColors={data.colors}
+        lineWidth={light ? 1.8 : 2.2}
         transparent
-        opacity={light ? 0.22 : 0.14}
+        opacity={light ? 0.14 : 0.18}
         depthWrite={false}
         blending={blend}
       />
-      {/* Crisp core pass */}
+      {/* Very thin crisp core */}
       <Line
-        points={pts}
+        points={data.pts}
         segments
-        color={crisp}
+        color="#ffffff"
+        vertexColors={data.colors}
         lineWidth={1}
         transparent
-        opacity={light ? 0.95 : 0.78}
+        opacity={light ? 0.95 : 0.9}
         depthWrite={false}
         blending={blend}
       />
