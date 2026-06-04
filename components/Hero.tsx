@@ -4,6 +4,7 @@ import { useRef, useEffect } from 'react'
 import { motion, useMotionValue, useSpring } from 'framer-motion'
 import { ArrowDown, Download, Mail, ExternalLink } from 'lucide-react'
 import dynamic from 'next/dynamic'
+import CountUp from 'react-countup'
 
 const NetworkBackground = dynamic(() => import('./NetworkBackground'), { ssr: false })
 
@@ -154,13 +155,21 @@ export default function Hero() {
           className="mt-20 flex flex-wrap justify-center gap-8 md:gap-16"
         >
           {[
-            { value: '3.5+', label: 'Years Experience' },
-            { value: '5M+', label: 'Records Processed' },
-            { value: '30%', label: 'Efficiency Gain' },
-            { value: '10+', label: 'Projects Delivered' },
-          ].map(stat => (
+            { value: 3.5, decimals: 1, suffix: '+', label: 'Years Experience' },
+            { value: 5,   decimals: 0, suffix: 'M+', label: 'Records Processed' },
+            { value: 30,  decimals: 0, suffix: '%', label: 'Efficiency Gain' },
+            { value: 10,  decimals: 0, suffix: '+', label: 'Projects Delivered' },
+          ].map((stat, i) => (
             <div key={stat.label} className="text-center">
-              <div className="text-2xl md:text-3xl font-black gradient-text">{stat.value}</div>
+              <div className="text-2xl md:text-3xl font-black gradient-text">
+                <CountUp
+                  end={stat.value}
+                  decimals={stat.decimals}
+                  suffix={stat.suffix}
+                  duration={2}
+                  delay={0.9 + i * 0.1}
+                />
+              </div>
               <div className="text-xs text-[#94A3B8] mt-1 font-mono uppercase tracking-wider">{stat.label}</div>
             </div>
           ))}

@@ -12,6 +12,7 @@ import Experience from '@/components/Experience'
 import Projects from '@/components/Projects'
 import DataGlobe from '@/components/DataGlobe'
 import DataPipeline from '@/components/DataPipeline'
+import LiveMetrics from '@/components/LiveMetrics'
 import Terminal from '@/components/Terminal'
 import Certifications from '@/components/Certifications'
 import GitHubStats from '@/components/GitHubStats'
@@ -41,6 +42,7 @@ export default function Home() {
       <Projects />
       <DataGlobe />
       <DataPipeline />
+      <LiveMetrics />
       <Certifications />
       <GitHubStats />
       <Terminal />

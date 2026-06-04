@@ -2,7 +2,7 @@
 
 import { useRef, useState } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { Mail, Github, Linkedin, Send, CheckCircle, MapPin, Clock } from 'lucide-react'
+import { Mail, Github, Linkedin, Send, CheckCircle, MapPin, Clock, Copy, Check } from 'lucide-react'
 
 const socials = [
   {
@@ -35,6 +35,19 @@ export default function Contact() {
   const [focused, setFocused] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [copied, setCopied] = useState(false)
+
+  const copyEmail = async (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    try {
+      await navigator.clipboard.writeText('ayushmishra750980@gmail.com')
+      setCopied(true)
+      setTimeout(() => setCopied(false), 2000)
+    } catch {
+      window.open('mailto:ayushmishra750980@gmail.com')
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -154,10 +167,26 @@ export default function Contact() {
                 >
                   <s.icon className="w-5 h-5" style={{ color: s.color }} />
                 </div>
-                <div>
+                <div className="min-w-0">
                   <div className="text-xs text-[#94A3B8] font-mono uppercase tracking-wider">{s.label}</div>
-                  <div className="text-white text-sm font-medium group-hover:text-[#38BDF8] transition-colors">{s.value}</div>
+                  <div className="text-white text-sm font-medium group-hover:text-[#38BDF8] transition-colors truncate">{s.value}</div>
                 </div>
+
+                {/* Copy button (email only) */}
+                {s.label === 'Email' && (
+                  <button
+                    onClick={copyEmail}
+                    className="ml-auto shrink-0 w-9 h-9 rounded-lg flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+                    aria-label="Copy email address"
+                    title="Copy email"
+                  >
+                    {copied ? (
+                      <Check className="w-4 h-4 text-[#34D399]" />
+                    ) : (
+                      <Copy className="w-4 h-4 text-[#94A3B8]" />
+                    )}
+                  </button>
+                )}
               </motion.a>
             ))}
           </motion.div>
@@ -267,6 +296,21 @@ export default function Contact() {
           </motion.div>
         </div>
       </div>
+
+      {/* Copy-email toast */}
+      <AnimatePresence>
+        {copied && (
+          <motion.div
+            initial={{ opacity: 0, y: 30, scale: 0.9 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 30, scale: 0.9 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] flex items-center gap-2 glass-strong rounded-xl px-4 py-3 border border-[#34D399]/30"
+          >
+            <Check className="w-4 h-4 text-[#34D399]" />
+            <span className="text-white text-sm font-medium">Email copied to clipboard</span>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
