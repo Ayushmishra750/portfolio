@@ -25,6 +25,7 @@ const categories: Category[] = [
       { name: 'AWS Glue', level: 88, desc: 'Serverless ETL jobs & data catalog' },
       { name: 'AWS S3', level: 90, desc: 'Object storage & data lakes' },
       { name: 'AWS Step Functions', level: 82, desc: 'Pipeline workflow orchestration' },
+      { name: 'AWS Lambda', level: 80, desc: 'Event-driven serverless functions' },
     ]
   },
   {
@@ -35,6 +36,7 @@ const categories: Category[] = [
       { name: 'Amazon Athena', level: 80, desc: 'Serverless SQL over S3 data lakes' },
       { name: 'Amazon EMR', level: 72, desc: 'Managed Spark / Hadoop clusters' },
       { name: 'Amazon Redshift', level: 76, desc: 'Cloud MPP data warehouse' },
+      { name: 'Amazon CloudWatch', level: 78, desc: 'Pipeline monitoring, logs & alarms' },
     ]
   },
   {
@@ -57,6 +59,17 @@ const categories: Category[] = [
       { name: 'Snowflake Schema', level: 80, desc: 'Normalized dimension hierarchies' },
       { name: 'Fact Tables', level: 85, desc: 'Additive & semi-additive measures' },
       { name: 'Dimension Tables', level: 85, desc: 'Conformed & slowly-changing dims' },
+    ]
+  },
+  {
+    id: 'analytics',
+    label: 'Analytics & BI',
+    color: '#14B8A6',
+    skills: [
+      { name: 'Tableau', level: 82, desc: 'Interactive dashboards & BI reporting' },
+      { name: 'Advanced Excel', level: 85, desc: 'Pivot tables, Power Query, modeling' },
+      { name: 'Pandas', level: 88, desc: 'DataFrame wrangling & analysis' },
+      { name: 'NumPy', level: 82, desc: 'Vectorized numerical computing' },
     ]
   },
   {
@@ -247,7 +260,7 @@ export default function Skills() {
         >
           <p className="text-[#94A3B8] text-sm mb-6 font-mono uppercase tracking-wider">Also familiar with</p>
           <div className="flex flex-wrap justify-center gap-3">
-            {['Git', 'Jira', 'Linux', 'Jupyter', 'VS Code', 'DBeaver', 'Pandas', 'NumPy', 'Tableau'].map((tool, i) => (
+            {['Git', 'Jira', 'Linux', 'Jupyter', 'VS Code'].map((tool, i) => (
               <motion.span
                 key={tool}
                 initial={{ opacity: 0 }}
