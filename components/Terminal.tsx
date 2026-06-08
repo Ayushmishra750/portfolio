@@ -318,7 +318,7 @@ export default function TerminalSection() {
   const quickCommands = ['help', 'whoami', 'skills', 'projects', 'architecture', 'certifications', 'resume', 'contact']
 
   return (
-    <section id="terminal" ref={sectionRef} className="section-padding relative overflow-hidden">
+    <section id="terminal" ref={sectionRef} className="force-dark section-padding relative overflow-hidden">
       <div className="absolute inset-0 aurora-bg pointer-events-none" />
 
       <div className="max-w-5xl mx-auto px-6 relative z-10">

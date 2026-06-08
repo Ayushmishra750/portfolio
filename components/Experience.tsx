@@ -78,8 +78,15 @@ export default function Experience() {
             transition={{ duration: 0.7, delay: 0.2 }}
             className="relative ml-16 md:ml-0 md:w-full"
           >
-            {/* Timeline dot */}
-            <div className="absolute left-[-2.75rem] md:left-1/2 md:-translate-x-1/2 top-8 w-5 h-5 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#A855F7] border-2 border-[#050816] z-10 shadow-lg shadow-[#38BDF8]/30" />
+            {/* Timeline dot with glowing pulse */}
+            <div className="absolute left-[-2.75rem] md:left-1/2 md:-translate-x-1/2 top-8 z-10 w-5 h-5">
+              <motion.span
+                className="absolute -inset-1.5 rounded-full bg-[#38BDF8]/40 blur-[5px]"
+                animate={{ scale: [1, 1.5, 1], opacity: [0.6, 0.15, 0.6] }}
+                transition={{ duration: 2.4, repeat: Infinity, ease: 'easeInOut' }}
+              />
+              <div className="relative w-5 h-5 rounded-full bg-gradient-to-br from-[#38BDF8] to-[#A855F7] border-2 border-[#050816] shadow-lg shadow-[#38BDF8]/40" />
+            </div>
 
             {/* Card */}
             <div className="glass rounded-2xl p-8 gradient-border md:w-[calc(50%-2rem)] md:ml-auto group hover:bg-white/[0.07] transition-all duration-300">

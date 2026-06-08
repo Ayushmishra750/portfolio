@@ -245,8 +245,8 @@ body { transition: background-color 0.45s ease, color 0.45s ease; }
 /* Light elevation tokens (consumed by inline card styles) */
 html.light {
   --card-border-rest: #E2E8F0;
-  --card-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 30px rgba(15, 23, 42, 0.06);
-  --elev-shadow: rgba(15, 23, 42, 0.14);
+  --card-shadow-rest: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 40px rgba(15, 23, 42, 0.08);
+  --elev-shadow: rgba(15, 23, 42, 0.16);
 
   /* Light surface tokens */
   --page-bg: #F8FAFC;
@@ -273,18 +273,25 @@ html.light body {
   color: #0F172A;
 }
 
-/* Alternating section rhythm so white cards read as "floating" */
+/* Alternating section rhythm so white cards read as "floating".
+   Pipeline + Terminal are intentionally dark (.force-dark) showcase panels,
+   so they are excluded here and break up the light rhythm for contrast. */
 html.light #about,
 html.light #experience,
 html.light #certifications,
-html.light #contact,
-html.light #globe,
-html.light #telemetry,
-html.light #terminal     { background-color: #F8FAFC; }
+html.light #contact      { background-color: #F8FAFC; }
 html.light #skills,
+html.light #projects     { background-color: #F5F7FB; }
+
+/* Hairline separators add crispness between stacked light sections */
+html.light #about,
+html.light #skills,
+html.light #experience,
 html.light #projects,
-html.light #github,
-html.light #pipeline     { background-color: #F1F5F9; }
+html.light #certifications,
+html.light #contact {
+  border-top: 1px solid rgba(15, 23, 42, 0.05);
+}
 
 /* Surfaces & text */
 html.light .bg-\[\#050816\]        { background-color: #F8FAFC !important; }
@@ -340,16 +347,34 @@ html.light .text-white.from-\[\#38BDF8\]        { color: #FFFFFF !important; }
 html.light .border-\[\#050816\]\/30 { border-color: rgba(255, 255, 255, 0.40) !important; }
 html.light .border-t-\[\#050816\]   { border-top-color: #FFFFFF !important; }
 
-/* Cards: solid white, real depth from layered shadows */
+/* Cards: solid white, real depth from layered shadows (floating surfaces) */
 html.light .glass {
   background: #FFFFFF;
   border-color: #E2E8F0;
-  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 10px 40px rgba(15, 23, 42, 0.08);
 }
 html.light .glass-strong {
-  background: rgba(255, 255, 255, 0.88);
+  background: #FFFFFF;
   border-color: #E2E8F0;
-  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05), 0 16px 48px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), 0 22px 60px rgba(15, 23, 42, 0.12);
+}
+
+/* Hover elevation for the About cards (Skills/Projects/Certs/Pipeline and
+   the Contact social cards manage their own hover shadow inline). Scoped so
+   it never touches the navbar pill or footer icon buttons. */
+html.light #about .glass {
+  transition: box-shadow 0.3s ease, transform 0.3s ease, border-color 0.3s ease, background-color 0.3s ease;
+}
+html.light #about .glass:hover {
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06), 0 16px 44px rgba(15, 23, 42, 0.12);
+  transform: translateY(-4px);
+}
+
+/* Gradient-border cards: deepen the cyan→purple so it reads premium, not
+   neon, against white (and soften it). */
+html.light .gradient-border::before {
+  background: linear-gradient(135deg, #0284C7, #9333EA);
+  opacity: 0.55;
 }
 
 /* Translucent floating navbar with soft shadow */
@@ -416,17 +441,48 @@ html.light #contact textarea:focus {
 /* Premium light Hero backdrop layer (hidden in dark) */
 .hero-light-decor { opacity: 0; transition: opacity 0.5s ease; }
 html.light .hero-light-decor { opacity: 1; }
-/* Keep the network canvas at full wrapper opacity in light; its colours are
-   deepened + alpha-boosted inside the component so it stays clearly visible. */
-html.light .hero-canvas { opacity: 1; }
+/* In light mode the network canvas is dialled back so the mesh/orbs/beams
+   carry the look; its colours are deepened inside the component. */
+html.light .hero-canvas { opacity: 0.55; }
+
+/* Drifting light beams behind the hero (only rendered inside hero-light-decor,
+   which is invisible in dark). */
+.hero-beam {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(28px);
+  will-change: transform, opacity;
+}
+.hero-beam-1 { animation: hero-beam 13s ease-in-out infinite; }
+.hero-beam-2 { animation: hero-beam 17s ease-in-out infinite reverse; }
+@keyframes hero-beam {
+  0%, 100% { transform: translateX(-10%) skewX(-14deg); opacity: 0.35; }
+  50%      { transform: translateX(10%)  skewX(-14deg); opacity: 0.75; }
+}
 
 /* ── Keep showcase sections dark in light mode (revert with higher specificity) ── */
 html.light .force-dark {
   background-color: #050816 !important;
-  /* restore dark elevation tokens inside dark panels */
+  /* restore dark tokens inside dark showcase panels */
   --card-border-rest: rgba(255, 255, 255, 0.07);
   --card-shadow-rest: none;
   --elev-shadow: rgba(0, 0, 0, 0.45);
+  --page-bg: #050816;
+  --surface-line: rgba(255, 255, 255, 0.10);
+  --surface-dot: rgba(255, 255, 255, 0.20);
+  /* keep the terminal a true dark panel (its colours come from these vars) */
+  --term-bg: #0d1117;
+  --term-bar: #0d1117;
+  --term-status: #0a0f17;
+  --term-window-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.55);
+  --term-ghost: rgba(255, 255, 255, 0.22);
+  --term-default: #CBD5E1;
+  --term-success: #34D399;
+  --term-error: #F87171;
+  --term-info: #38BDF8;
+  --term-accent: #A855F7;
+  --term-muted: #64748B;
+  --term-header: #F59E0B;
 }
 html.light .force-dark .text-white  { color: #FFFFFF !important; }
 html.light .force-dark .text-\[\#94A3B8\] { color: #94A3B8 !important; }
@@ -479,6 +535,25 @@ html.light .force-dark .border-white\/15,
 html.light .force-dark .border-white\/20,
 html.light .force-dark .border-white\/40 { border-color: rgba(255, 255, 255, 0.10) !important; }
 html.light .force-dark .hover\:bg-white\/\[0\.07\]:hover { background-color: rgba(255, 255, 255, 0.07) !important; }
+/* Restore the dark aurora bloom inside dark showcase panels */
+html.light .force-dark .aurora-bg {
+  opacity: 1;
+  background:
+    radial-gradient(ellipse at 20% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 80% 20%, rgba(168, 85, 247, 0.08) 0%, transparent 50%),
+    radial-gradient(ellipse at 50% 80%, rgba(56, 189, 248, 0.05) 0%, transparent 50%);
+  background-size: 200% 200%;
+}
+/* Soft top/bottom fade so the dark showcase panels blend into the light page */
+html.light #pipeline.force-dark::before,
+html.light #terminal.force-dark::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(180deg, rgba(248, 250, 252, 0.12) 0%, transparent 14%, transparent 86%, rgba(248, 250, 252, 0.12) 100%);
+  z-index: 0;
+}
 
 /* Respect users who prefer reduced motion */
 @media (prefers-reduced-motion: reduce) {
@@ -498,7 +573,9 @@ html.light .force-dark .hover\:bg-white\/\[0\.07\]:hover { background-color: rgb
   .float-2,
   .float-3,
   .aurora-bg,
-  .gradient-text {
+  .gradient-text,
+  .hero-beam-1,
+  .hero-beam-2 {
     animation: none !important;
   }
 }

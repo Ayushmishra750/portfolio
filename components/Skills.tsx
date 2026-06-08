@@ -118,7 +118,7 @@ export default function Skills() {
                   ? 'text-[#050816] shadow-lg'
                   : 'glass text-[#94A3B8] hover:text-white'
               }`}
-              style={activeCategory === cat.id ? { background: cat.color } : {}}
+              style={activeCategory === cat.id ? { background: cat.color, boxShadow: `0 10px 30px ${cat.color}55, 0 0 0 1px ${cat.color}40` } : {}}
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.97 }}
             >

@@ -45,18 +45,35 @@ export default function Hero() {
         <NetworkBackground />
       </div>
 
-      {/* Premium light-mode backdrop: mesh gradient, floating orbs, subtle grid */}
+      {/* Premium light-mode backdrop: mesh gradient, light beams, orbs, grid */}
       <div className="hero-light-decor absolute inset-0 pointer-events-none overflow-hidden">
+        {/* Mesh gradient */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              'radial-gradient(ellipse 80% 60% at 18% 8%, rgba(56,189,248,0.20), transparent 60%), radial-gradient(ellipse 70% 60% at 86% 18%, rgba(168,85,247,0.18), transparent 60%), radial-gradient(ellipse 90% 70% at 50% 105%, rgba(52,211,153,0.12), transparent 60%)',
+              'radial-gradient(ellipse 80% 60% at 18% 8%, rgba(56,189,248,0.22), transparent 60%), radial-gradient(ellipse 70% 60% at 86% 18%, rgba(168,85,247,0.20), transparent 60%), radial-gradient(ellipse 90% 70% at 50% 105%, rgba(52,211,153,0.14), transparent 60%)',
           }}
         />
-        <div className="float-1 absolute top-[14%] left-[10%] w-72 h-72 rounded-full blur-[90px]" style={{ background: 'rgba(56,189,248,0.28)' }} />
-        <div className="float-2 absolute top-[38%] right-[8%] w-80 h-80 rounded-full blur-[100px]" style={{ background: 'rgba(168,85,247,0.24)' }} />
-        <div className="float-3 absolute bottom-[8%] left-[42%] w-64 h-64 rounded-full blur-[90px]" style={{ background: 'rgba(52,211,153,0.18)' }} />
+        {/* Drifting light beams */}
+        <div
+          className="hero-beam hero-beam-1 absolute left-[6%] top-[-12%] w-[40%] h-[124%]"
+          style={{ background: 'linear-gradient(180deg, rgba(56,189,248,0.18), rgba(56,189,248,0))' }}
+        />
+        <div
+          className="hero-beam hero-beam-2 absolute right-[10%] top-[-12%] w-[32%] h-[124%]"
+          style={{ background: 'linear-gradient(180deg, rgba(168,85,247,0.16), rgba(168,85,247,0))' }}
+        />
+        {/* Soft white halo for depth behind the headline */}
+        <div
+          className="absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 w-[860px] max-w-[92vw] h-[520px] rounded-full"
+          style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.72), rgba(255,255,255,0) 70%)', filter: 'blur(18px)' }}
+        />
+        {/* Floating colour orbs */}
+        <div className="float-1 absolute top-[14%] left-[10%] w-72 h-72 rounded-full blur-[90px]" style={{ background: 'rgba(56,189,248,0.30)' }} />
+        <div className="float-2 absolute top-[38%] right-[8%] w-80 h-80 rounded-full blur-[100px]" style={{ background: 'rgba(168,85,247,0.26)' }} />
+        <div className="float-3 absolute bottom-[8%] left-[42%] w-64 h-64 rounded-full blur-[90px]" style={{ background: 'rgba(52,211,153,0.20)' }} />
+        {/* Subtle grid */}
         <div
           className="absolute inset-0"
           style={{

@@ -18,12 +18,28 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [activeSection, setActiveSection] = useState('')
+  const [light, setLight] = useState(false)
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 50)
     window.addEventListener('scroll', handleScroll)
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  // Mirror the active theme so the navbar can stay a detached glass pill in
+  // light mode (where a transparent bar would vanish into the page).
+  useEffect(() => {
+    const el = document.documentElement
+    const sync = () => setLight(el.classList.contains('light'))
+    sync()
+    const obs = new MutationObserver(sync)
+    obs.observe(el, { attributes: true, attributeFilter: ['class'] })
+    return () => obs.disconnect()
+  }, [])
+
+  // In light mode the pill is always solid/glassy; in dark it stays
+  // transparent at the top and condenses on scroll (unchanged).
+  const solid = scrolled || light
 
   // Track which section is currently in view to highlight the nav link
   useEffect(() => {
@@ -61,8 +77,8 @@ export default function Navbar() {
         }`}
       >
         <div className={`mx-auto max-w-6xl px-6 flex items-center justify-between rounded-2xl transition-all duration-500 ${
-          scrolled ? 'glass shadow-lg shadow-black/20 mx-4' : ''
-        }`} style={{ padding: scrolled ? '12px 24px' : '0 24px' }}>
+          solid ? 'glass shadow-lg shadow-black/20' : ''
+        } ${scrolled ? 'mx-4' : ''}`} style={{ padding: solid ? '12px 24px' : '0 24px' }}>
           {/* Logo */}
           <motion.button
             onClick={() => scrollTo('#hero')}
