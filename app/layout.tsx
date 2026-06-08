@@ -3,8 +3,8 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: 'Ayush Mishra | Data Engineer | PySpark | AWS | Python',
-  description: 'Senior Data Engineer with 3.5+ years building scalable data pipelines, ETL systems, and cloud-native solutions on AWS. Expert in PySpark, SQL, Python, and BigQuery.',
-  keywords: ['Data Engineer', 'PySpark Developer', 'AWS Data Engineer', 'ETL Developer', 'SQL Developer', 'Python Developer', 'Big Data', 'Ayush Mishra'],
+  description: 'Data Engineer with 3.5+ years building scalable data pipelines, ETL systems, and cloud-native solutions on AWS. Skilled in PySpark, SQL, Python, Snowflake, and data warehousing.',
+  keywords: ['Data Engineer', 'PySpark Developer', 'AWS Data Engineer', 'ETL Developer', 'SQL Developer', 'Python Developer', 'AWS Glue', 'Snowflake', 'Data Warehousing', 'Data Modeling', 'Big Data', 'Ayush Mishra'],
   authors: [{ name: 'Ayush Mishra', url: 'https://ayushmishra.dev' }],
   creator: 'Ayush Mishra',
   openGraph: {
@@ -51,7 +51,7 @@ export default function RootLayout({
               "description": "Data Engineer with 3.5+ years of experience in PySpark, AWS, and Python",
               "email": "ayushmishra750980@gmail.com",
               "address": { "@type": "PostalAddress", "addressLocality": "Noida", "addressCountry": "IN" },
-              "knowsAbout": ["Data Engineering", "PySpark", "AWS", "Python", "SQL", "ETL", "Big Data"],
+              "knowsAbout": ["Data Engineering", "PySpark", "AWS", "AWS Glue", "Python", "SQL", "ETL", "Snowflake", "Data Warehousing", "Data Modeling", "Big Data"],
             })
           }}
         />

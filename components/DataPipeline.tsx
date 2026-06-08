@@ -60,7 +60,7 @@ const pipelineStages: Stage[] = [
   },
   {
     id: 'warehouse',
-    label: 'BigQuery / Redshift',
+    label: 'Snowflake / Redshift',
     sub: 'Data Warehouse',
     icon: Warehouse,
     color: '#FB923C',
@@ -82,8 +82,40 @@ const insights = [
   { title: 'Distributed PySpark Processing',    desc: 'Parallel ETL across partitioned datasets on AWS Glue workers.',      color: '#F59E0B' },
   { title: 'Automated Data Validation',         desc: 'Schema, reconciliation and business-rule checks on every run.',       color: '#34D399' },
   { title: 'Scalable Data Lake Architecture',   desc: 'S3-backed storage for CSV, JSON and columnar Parquet at scale.',      color: '#60A5FA' },
-  { title: 'Data Warehouse Analytics',          desc: 'High-speed aggregations on BigQuery / Redshift reporting layers.',    color: '#FB923C' },
+  { title: 'Data Warehouse Analytics',          desc: 'High-speed aggregations on Snowflake / Redshift reporting layers.',   color: '#FB923C' },
   { title: 'Business Intelligence Reporting',   desc: 'Executive KPI dashboards and insights delivered via Tableau.',        color: '#F472B6' },
+]
+
+// Enterprise architecture patterns showcased below the live flow
+const architectures = [
+  {
+    title: 'Batch ETL Architecture',
+    icon: Cpu,
+    color: '#F59E0B',
+    desc: 'Orchestrated batch pipelines: S3 → Step Functions → Glue / PySpark → warehouse, with retries, checkpoints and monitoring.',
+    tags: ['Step Functions', 'AWS Glue', 'PySpark', 'S3'],
+  },
+  {
+    title: 'Data Validation Architecture',
+    icon: ShieldCheck,
+    color: '#34D399',
+    desc: 'Config-driven schema, reconciliation and business-rule checks run on every load before data reaches reporting.',
+    tags: ['PySpark', 'Reconciliation', 'Quality Gates'],
+  },
+  {
+    title: 'Data Migration Framework',
+    icon: HardDrive,
+    color: '#38BDF8',
+    desc: 'Repeatable, idempotent migration of legacy datasets into the cloud warehouse with full source-to-target parity.',
+    tags: ['AWS Glue', 'S3', 'Step Functions', 'Redshift'],
+  },
+  {
+    title: 'Analytics Warehouse Architecture',
+    icon: Warehouse,
+    color: '#FB923C',
+    desc: 'Star-schema modeling on Snowflake / Redshift powering fast aggregations and self-serve BI in Tableau.',
+    tags: ['Snowflake', 'Redshift', 'Star Schema', 'Tableau'],
+  },
 ]
 
 const PACKET_COUNT = 3
@@ -359,6 +391,59 @@ export default function DataPipeline() {
             </AnimatePresence>
           </motion.div>
         </div>
+
+        {/* Enterprise architecture patterns */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={inView ? { opacity: 1, y: 0 } : {}}
+          transition={{ delay: 0.8 }}
+          className="mt-16"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <h3 className="text-white font-bold text-lg whitespace-nowrap">Enterprise Data Architectures</h3>
+            <div className="flex-1 h-px bg-white/5" />
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {architectures.map((a, i) => (
+              <motion.div
+                key={a.title}
+                initial={{ opacity: 0, y: 30 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ delay: 0.85 + i * 0.1 }}
+                className="glass rounded-2xl p-6 group transition-all duration-300 hover:-translate-y-1.5"
+                style={{ border: '1px solid var(--card-border-rest)', boxShadow: 'var(--card-shadow-rest)' }}
+                onMouseEnter={e => {
+                  (e.currentTarget as HTMLElement).style.border = `1px solid ${a.color}40`
+                  ;(e.currentTarget as HTMLElement).style.boxShadow = `0 18px 40px var(--elev-shadow), 0 0 30px ${a.color}18`
+                }}
+                onMouseLeave={e => {
+                  (e.currentTarget as HTMLElement).style.border = '1px solid var(--card-border-rest)'
+                  ;(e.currentTarget as HTMLElement).style.boxShadow = 'var(--card-shadow-rest)'
+                }}
+              >
+                <div
+                  className="w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110"
+                  style={{ background: `${a.color}20` }}
+                >
+                  <a.icon className="w-5 h-5" style={{ color: a.color }} />
+                </div>
+                <h4 className="text-white font-bold text-sm mb-2 leading-snug">{a.title}</h4>
+                <p className="text-[#94A3B8] text-xs leading-relaxed mb-4">{a.desc}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {a.tags.map(t => (
+                    <span
+                      key={t}
+                      className="px-2 py-0.5 rounded-md text-[10px] font-mono"
+                      style={{ color: a.color, background: `${a.color}12`, border: `1px solid ${a.color}26` }}
+                    >
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )

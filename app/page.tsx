@@ -10,12 +10,9 @@ import About from '@/components/About'
 import Skills from '@/components/Skills'
 import Experience from '@/components/Experience'
 import Projects from '@/components/Projects'
-import DataGlobe from '@/components/DataGlobe'
 import DataPipeline from '@/components/DataPipeline'
-import LiveMetrics from '@/components/LiveMetrics'
 import Terminal from '@/components/Terminal'
 import Certifications from '@/components/Certifications'
-import GitHubStats from '@/components/GitHubStats'
 import Contact from '@/components/Contact'
 import Footer from '@/components/Footer'
 import TerminalFab from '@/components/TerminalFab'
@@ -40,11 +37,8 @@ export default function Home() {
       <Skills />
       <Experience />
       <Projects />
-      <DataGlobe />
       <DataPipeline />
-      <LiveMetrics />
       <Certifications />
-      <GitHubStats />
       <Terminal />
       <Contact />
       <Footer />

@@ -3,59 +3,73 @@
 import { useRef, useState } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
 
-const categories = [
+type Skill = { name: string; level: number; desc: string }
+type Category = {
+  id: string
+  label: string
+  color: string
+  skills: Skill[]
+  learning?: boolean
+  note?: string
+}
+
+const categories: Category[] = [
   {
-    id: 'programming',
-    label: 'Programming',
+    id: 'core',
+    label: 'Core Skills',
     color: '#38BDF8',
     skills: [
-      { name: 'Python', level: 92, desc: 'Data pipelines, automation, scripting' },
-      { name: 'SQL', level: 95, desc: 'Complex queries, optimization, analytics' },
-      { name: 'Java', level: 65, desc: 'Backend services, enterprise apps' },
-      { name: 'PySpark', level: 88, desc: 'Distributed data processing' },
+      { name: 'SQL', level: 95, desc: 'Complex queries, tuning, analytics' },
+      { name: 'Python', level: 92, desc: 'Pipelines, automation, scripting' },
+      { name: 'PySpark', level: 88, desc: 'Distributed data processing at scale' },
+      { name: 'AWS Glue', level: 88, desc: 'Serverless ETL jobs & data catalog' },
+      { name: 'AWS S3', level: 90, desc: 'Object storage & data lakes' },
+      { name: 'AWS Step Functions', level: 82, desc: 'Pipeline workflow orchestration' },
     ]
   },
   {
     id: 'cloud',
-    label: 'Cloud & AWS',
+    label: 'Cloud & Big Data',
     color: '#A855F7',
     skills: [
-      { name: 'AWS S3', level: 90, desc: 'Object storage, data lakes' },
-      { name: 'AWS Glue', level: 88, desc: 'ETL jobs, data catalog' },
-      { name: 'Step Functions', level: 80, desc: 'Workflow orchestration' },
-      { name: 'AWS Lambda', level: 78, desc: 'Serverless functions' },
-      { name: 'BigQuery', level: 82, desc: 'Google cloud analytics' },
+      { name: 'Amazon Athena', level: 80, desc: 'Serverless SQL over S3 data lakes' },
+      { name: 'Amazon EMR', level: 72, desc: 'Managed Spark / Hadoop clusters' },
+      { name: 'Amazon Redshift', level: 76, desc: 'Cloud MPP data warehouse' },
     ]
   },
   {
-    id: 'bigdata',
-    label: 'Big Data',
+    id: 'warehouse',
+    label: 'Data Warehousing',
     color: '#34D399',
     skills: [
-      { name: 'PySpark', level: 88, desc: 'Distributed processing at scale' },
-      { name: 'ETL Design', level: 92, desc: 'Pipeline architecture' },
-      { name: 'Data Modeling', level: 85, desc: 'Schema design, warehousing' },
-      { name: 'Distributed Systems', level: 80, desc: 'Fault-tolerant processing' },
+      { name: 'Snowflake', level: 75, desc: 'Cloud warehouse, virtual warehouses' },
+      { name: 'BigQuery', level: 78, desc: 'Serverless analytics warehouse' },
+      { name: 'Data Warehouse Design', level: 82, desc: 'ELT layering & optimization' },
     ]
   },
   {
-    id: 'analytics',
-    label: 'Analytics',
+    id: 'modeling',
+    label: 'Data Modeling',
     color: '#FB923C',
     skills: [
-      { name: 'Pandas', level: 90, desc: 'Data manipulation and analysis' },
-      { name: 'NumPy', level: 85, desc: 'Numerical computing' },
-      { name: 'EDA', level: 88, desc: 'Exploratory data analysis' },
-      { name: 'Excel', level: 80, desc: 'Advanced spreadsheet analytics' },
+      { name: 'Dimensional Modeling', level: 84, desc: 'Kimball-style analytics design' },
+      { name: 'Star Schema', level: 86, desc: 'Denormalized reporting schemas' },
+      { name: 'Snowflake Schema', level: 80, desc: 'Normalized dimension hierarchies' },
+      { name: 'Fact Tables', level: 85, desc: 'Additive & semi-additive measures' },
+      { name: 'Dimension Tables', level: 85, desc: 'Conformed & slowly-changing dims' },
     ]
   },
   {
-    id: 'viz',
-    label: 'Visualization',
+    id: 'learning',
+    label: 'Modern Data Stack',
     color: '#F472B6',
+    learning: true,
+    note: 'Actively learning — hands-on through side projects, not yet production-depth.',
     skills: [
-      { name: 'Tableau', level: 82, desc: 'Interactive dashboards' },
-      { name: 'Data Storytelling', level: 80, desc: 'Business reporting' },
+      { name: 'Apache Airflow', level: 45, desc: 'DAG-based workflow orchestration' },
+      { name: 'dbt', level: 42, desc: 'SQL transformation, tests & lineage' },
+      { name: 'Docker', level: 48, desc: 'Containerizing data workloads' },
+      { name: 'Databricks', level: 38, desc: 'Lakehouse & managed Spark' },
     ]
   },
 ]
@@ -109,9 +123,34 @@ export default function Skills() {
               whileTap={{ scale: 0.97 }}
             >
               {cat.label}
+              {cat.learning && (
+                <span
+                  className="ml-2 text-[9px] font-mono uppercase tracking-wider px-1.5 py-0.5 rounded-full align-middle"
+                  style={{
+                    background: activeCategory === cat.id ? 'rgba(5,8,22,0.16)' : `${cat.color}22`,
+                    color: activeCategory === cat.id ? '#050816' : cat.color,
+                  }}
+                >
+                  Learning
+                </span>
+              )}
             </motion.button>
           ))}
         </motion.div>
+
+        {/* Learning-track honesty note */}
+        {current.learning && current.note && (
+          <motion.p
+            key={current.id + '-note'}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center justify-center gap-2 text-sm mb-10 -mt-4 font-mono"
+            style={{ color: current.color }}
+          >
+            <span className="w-1.5 h-1.5 rounded-full" style={{ background: current.color }} />
+            {current.note}
+          </motion.p>
+        )}
 
         {/* Skills grid */}
         <AnimatePresence mode="wait">
@@ -149,13 +188,22 @@ export default function Skills() {
                     </h3>
                     <p className="text-[#94A3B8] text-sm mt-0.5">{skill.desc}</p>
                   </div>
-                  <motion.span
-                    className="text-2xl font-black"
-                    style={{ color: current.color }}
-                    animate={{ scale: hoveredSkill === skill.name ? 1.2 : 1 }}
-                  >
-                    {skill.level}%
-                  </motion.span>
+                  {current.learning ? (
+                    <span
+                      className="shrink-0 text-[10px] font-mono uppercase tracking-wider px-2 py-1 rounded-full whitespace-nowrap"
+                      style={{ color: current.color, background: `${current.color}18`, border: `1px solid ${current.color}40` }}
+                    >
+                      Learning
+                    </span>
+                  ) : (
+                    <motion.span
+                      className="text-2xl font-black"
+                      style={{ color: current.color }}
+                      animate={{ scale: hoveredSkill === skill.name ? 1.2 : 1 }}
+                    >
+                      {skill.level}%
+                    </motion.span>
+                  )}
                 </div>
 
                 {/* Skill bar */}
@@ -199,7 +247,7 @@ export default function Skills() {
         >
           <p className="text-[#94A3B8] text-sm mb-6 font-mono uppercase tracking-wider">Also familiar with</p>
           <div className="flex flex-wrap justify-center gap-3">
-            {['Git', 'Jira', 'Linux', 'Jupyter', 'VS Code', 'DBeaver', 'Apache Airflow'].map((tool, i) => (
+            {['Git', 'Jira', 'Linux', 'Jupyter', 'VS Code', 'DBeaver', 'Pandas', 'NumPy', 'Tableau'].map((tool, i) => (
               <motion.span
                 key={tool}
                 initial={{ opacity: 0 }}

@@ -9,7 +9,7 @@ import CountUp from 'react-countup'
 const NetworkBackground = dynamic(() => import('./NetworkBackground'), { ssr: false })
 
 const headline = "Building Scalable Data Systems That Transform Raw Data Into Business Intelligence"
-const roles = ['Data Engineer', 'PySpark Expert', 'AWS Architect', 'ETL Developer', 'SQL Developer']
+const roles = ['Data Engineer', 'PySpark Developer', 'AWS Data Engineer', 'ETL Developer', 'SQL Developer']
 
 export default function Hero() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -180,9 +180,9 @@ export default function Hero() {
         >
           {[
             { value: 3.5, decimals: 1, suffix: '+', label: 'Years Experience' },
-            { value: 5,   decimals: 0, suffix: 'M+', label: 'Records Processed' },
+            { value: 5,   decimals: 0, suffix: 'M+', label: 'Records / Day' },
             { value: 30,  decimals: 0, suffix: '%', label: 'Efficiency Gain' },
-            { value: 10,  decimals: 0, suffix: '+', label: 'Projects Delivered' },
+            { value: 6,   decimals: 0, suffix: '+', label: 'AWS Data Services' },
           ].map((stat, i) => (
             <div key={stat.label} className="text-center">
               <div className="text-2xl md:text-3xl font-black gradient-text">

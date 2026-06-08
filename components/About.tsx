@@ -9,7 +9,7 @@ const stats = [
   { value: 3.5, suffix: '+', label: 'Years Experience', icon: Zap },
   { value: 5, suffix: 'M+', label: 'Records Processed Daily', icon: Database },
   { value: 30, suffix: '%', label: 'Efficiency Improvement', icon: BarChart3 },
-  { value: 10, suffix: '+', label: 'Projects Delivered', icon: GitBranch },
+  { value: 6, suffix: '+', label: 'AWS Data Services', icon: GitBranch },
 ]
 
 const highlights = [
@@ -26,7 +26,7 @@ const highlights = [
   {
     icon: Server,
     title: 'Big Data Engineering',
-    desc: 'PySpark distributed computing, optimizing jobs for petabyte-scale datasets with 30%+ efficiency gains.'
+    desc: 'PySpark distributed computing, optimizing jobs for large-scale datasets with 30%+ efficiency gains.'
   },
 ]
 
@@ -79,14 +79,14 @@ export default function About() {
                 high-performance ETL pipelines and cloud-native data architectures.
               </p>
               <p className="text-[#94A3B8] leading-relaxed mt-4">
-                My expertise spans the full data lifecycle — from ingestion and transformation to analytics
-                and visualization — using cutting-edge tools like PySpark, AWS Glue, and BigQuery to
+                My work spans the full data lifecycle — from ingestion and transformation to
+                warehousing and analytics — using tools like PySpark, AWS Glue, and Snowflake to
                 deliver measurable business outcomes.
               </p>
             </div>
 
             <div className="grid grid-cols-3 gap-4">
-              {['Python', 'PySpark', 'SQL', 'AWS', 'BigQuery', 'Tableau'].map((tech, i) => (
+              {['Python', 'PySpark', 'SQL', 'AWS', 'Snowflake', 'Tableau'].map((tech, i) => (
                 <motion.div
                   key={tech}
                   initial={{ opacity: 0, scale: 0.8 }}

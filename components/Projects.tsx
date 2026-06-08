@@ -2,48 +2,107 @@
 
 import { useRef, useState } from 'react'
 import { motion, useInView, AnimatePresence } from 'framer-motion'
-import { X, ExternalLink, Github, BarChart3, Database, TrendingUp, Package, ArrowRight } from 'lucide-react'
+import { X, ExternalLink, TrendingUp, ArrowRight, ShieldCheck, Database, Package } from 'lucide-react'
 
-const projects = [
+type Project = {
+  id: number
+  title: string
+  category: string
+  icon: typeof Database
+  color: string
+  description: string
+  problem: string
+  architecture: string[]
+  tags: string[]
+  impactHeadline: string
+  impactBullets: string[]
+}
+
+const projects: Project[] = [
   {
     id: 1,
-    title: 'Revenue Optimisation & Experimentation Analysis System',
-    shortTitle: 'Revenue Optimization',
-    category: 'Analytics Platform',
-    description: 'End-to-end analytics system for revenue optimization combining SQL analytics, Python-driven insights, and A/B testing frameworks to drive data-informed business decisions.',
-    longDescription: 'Built a comprehensive revenue optimization platform that leverages advanced SQL analysis and Python analytics to identify growth opportunities. The system includes sophisticated A/B testing infrastructure, statistical significance testing, and Tableau dashboards for real-time revenue monitoring. Processes millions of transactions to surface actionable insights.',
-    icon: TrendingUp,
-    color: '#38BDF8',
-    tags: ['SQL', 'Python', 'A/B Testing', 'Tableau', 'Statistical Analysis', 'Data Analytics'],
-    highlights: [
-      'Designed SQL queries analyzing 10M+ transaction records',
-      'Built A/B testing framework with statistical significance validation',
-      'Created Tableau dashboards reducing reporting time by 60%',
-      'Automated revenue anomaly detection with Python alerts',
+    title: 'Data Validation & Reconciliation Framework',
+    category: 'Data Quality',
+    icon: ShieldCheck,
+    color: '#34D399',
+    description:
+      'A config-driven PySpark framework that validates and reconciles data between source systems and the warehouse, catching mismatches before they reach reporting.',
+    problem:
+      'Reconciliation between source systems and the warehouse was manual and query-by-query — slow, error-prone, and bad records were slipping into business reports.',
+    architecture: [
+      'Config-driven rules: schema, null, range, referential, row-count & checksum checks',
+      'PySpark jobs on AWS Glue compare source vs. target datasets at scale',
+      'Reconciliation summaries written to S3 and surfaced as a quality report',
+      'Failures are flagged and routed for review before any downstream load',
     ],
-    impact: 'Revenue insights delivered 15% revenue increase',
+    tags: ['PySpark', 'AWS Glue', 'Python', 'SQL', 'AWS S3', 'Data Quality'],
+    impactHeadline: '~80% less manual reconciliation',
+    impactBullets: [
+      'Automated row-count, checksum and business-rule checks across pipelines',
+      'Reduced manual reconciliation effort by roughly 80%',
+      'Caught schema & data drift before it reached reporting layers',
+    ],
   },
   {
     id: 2,
-    title: 'Operations & Supply Chain Performance Analytics',
-    shortTitle: 'Supply Chain Analytics',
-    category: 'Data Engineering',
-    description: 'Scalable analytics platform for supply chain operations, shipment tracking, and KPI monitoring with automated reporting pipelines.',
-    longDescription: 'Engineered a production-grade supply chain analytics solution that tracks logistics operations in real time. Features include automated ETL pipelines for shipment data, KPI tracking across 50+ metrics, and self-service reporting automation. Built on AWS infrastructure with PySpark for large-scale data processing.',
+    title: 'Enterprise Data Migration Platform',
+    category: 'Data Migration',
+    icon: Database,
+    color: '#38BDF8',
+    description:
+      'A repeatable, validated pipeline for migrating large datasets from legacy on-prem systems into an AWS data warehouse — with full source-to-target parity.',
+    problem:
+      'Legacy on-prem databases had to move to a cloud warehouse without disrupting downstream consumers or losing a single record across large historical datasets.',
+    architecture: [
+      'Batch extraction from legacy sources into an S3 landing zone',
+      'PySpark on AWS Glue for cleansing, type-casting & transformation',
+      'AWS Step Functions orchestrate staged loads with retries & checkpoints',
+      'Post-load reconciliation confirms parity between source and target',
+    ],
+    tags: ['AWS Glue', 'PySpark', 'AWS S3', 'Step Functions', 'Redshift', 'Python', 'SQL'],
+    impactHeadline: 'Zero data loss on migration',
+    impactBullets: [
+      'Migrated large historical datasets with full source-to-target parity',
+      'Idempotent, restartable loads via Step Functions checkpoints',
+      'Standardized schema & data types for downstream analytics',
+    ],
+  },
+  {
+    id: 3,
+    title: 'Supply Chain Analytics Pipeline',
+    category: 'Analytics Engineering',
     icon: Package,
     color: '#A855F7',
-    tags: ['PySpark', 'Python', 'SQL', 'AWS S3', 'ETL', 'KPI Analytics', 'Reporting'],
-    highlights: [
-      'Processed daily shipment data from 200+ logistics partners',
-      'Built automated KPI tracking across 50+ performance metrics',
-      'Reduced reporting cycle from 3 days to 4 hours with automation',
-      'Implemented real-time shipment anomaly detection system',
+    description:
+      'An automated ETL pipeline that turns raw logistics and shipment data into curated, analytics-ready star-schema tables and KPI dashboards.',
+    problem:
+      'Supply-chain KPIs were stitched together manually across spreadsheets, making reporting slow and inconsistent between teams.',
+    architecture: [
+      'Daily ingestion of shipment & order data into an S3 data lake',
+      'PySpark / Glue ETL builds curated fact & dimension tables (star schema)',
+      'Aggregations loaded into the warehouse reporting layer',
+      'Tableau dashboards expose KPIs & exceptions to stakeholders',
     ],
-    impact: '70% reduction in manual reporting effort',
+    tags: ['PySpark', 'AWS Glue', 'AWS S3', 'SQL', 'Star Schema', 'Tableau', 'ETL'],
+    impactHeadline: 'Reporting: days → hours',
+    impactBullets: [
+      'Automated KPI tracking across dozens of supply-chain metrics',
+      'Cut reporting turnaround from several days to hours',
+      'Modeled curated star-schema tables for self-serve analytics',
+    ],
   },
 ]
 
-function ProjectModal({ project, onClose }: { project: typeof projects[0]; onClose: () => void }) {
+function Section({ label, color, children }: { label: string; color: string; children: React.ReactNode }) {
+  return (
+    <div className="mb-6">
+      <h4 className="text-xs font-mono uppercase tracking-[0.2em] mb-3" style={{ color }}>{label}</h4>
+      {children}
+    </div>
+  )
+}
+
+function ProjectModal({ project, onClose }: { project: Project; onClose: () => void }) {
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -70,7 +129,7 @@ function ProjectModal({ project, onClose }: { project: typeof projects[0]; onClo
         </button>
 
         <div className="flex items-center gap-4 mb-6">
-          <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: `${project.color}20` }}>
+          <div className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0" style={{ background: `${project.color}20` }}>
             <project.icon className="w-7 h-7" style={{ color: project.color }} />
           </div>
           <div>
@@ -79,34 +138,46 @@ function ProjectModal({ project, onClose }: { project: typeof projects[0]; onClo
           </div>
         </div>
 
-        <p className="text-[#94A3B8] leading-relaxed mb-6">{project.longDescription}</p>
+        <Section label="Business Problem" color={project.color}>
+          <p className="text-[#94A3B8] leading-relaxed text-sm">{project.problem}</p>
+        </Section>
 
-        <div className="mb-6">
-          <h4 className="text-white font-semibold mb-3">Key Achievements</h4>
+        <Section label="Architecture" color={project.color}>
           <div className="space-y-2">
-            {project.highlights.map((h, i) => (
+            {project.architecture.map((step, i) => (
+              <div key={i} className="flex gap-3">
+                <span
+                  className="shrink-0 w-5 h-5 rounded-md flex items-center justify-center text-[10px] font-mono font-bold mt-0.5"
+                  style={{ background: `${project.color}20`, color: project.color }}
+                >
+                  {i + 1}
+                </span>
+                <span className="text-[#94A3B8] text-sm leading-relaxed">{step}</span>
+              </div>
+            ))}
+          </div>
+        </Section>
+
+        <Section label="Impact" color={project.color}>
+          <div className="space-y-2">
+            {project.impactBullets.map((h, i) => (
               <div key={i} className="flex gap-3">
                 <ArrowRight className="w-4 h-4 mt-0.5 shrink-0" style={{ color: project.color }} />
                 <span className="text-[#94A3B8] text-sm">{h}</span>
               </div>
             ))}
           </div>
-        </div>
+        </Section>
 
-        <div className="mb-6 p-4 rounded-xl" style={{ background: `${project.color}10`, border: `1px solid ${project.color}20` }}>
-          <div className="flex items-center gap-2">
-            <TrendingUp className="w-4 h-4" style={{ color: project.color }} />
-            <span className="text-white font-medium text-sm">Impact: {project.impact}</span>
+        <Section label="Technologies" color={project.color}>
+          <div className="flex flex-wrap gap-2">
+            {project.tags.map(tag => (
+              <span key={tag} className="px-3 py-1 rounded-full text-xs font-mono" style={{ color: project.color, background: `${project.color}15`, border: `1px solid ${project.color}30` }}>
+                {tag}
+              </span>
+            ))}
           </div>
-        </div>
-
-        <div className="flex flex-wrap gap-2">
-          {project.tags.map(tag => (
-            <span key={tag} className="px-3 py-1 rounded-full text-xs font-mono" style={{ color: project.color, background: `${project.color}15`, border: `1px solid ${project.color}30` }}>
-              {tag}
-            </span>
-          ))}
-        </div>
+        </Section>
       </motion.div>
     </motion.div>
   )
@@ -115,7 +186,7 @@ function ProjectModal({ project, onClose }: { project: typeof projects[0]; onClo
 export default function Projects() {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref, { once: true, margin: '-100px' })
-  const [selected, setSelected] = useState<typeof projects[0] | null>(null)
+  const [selected, setSelected] = useState<Project | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
 
   return (
@@ -133,17 +204,18 @@ export default function Projects() {
             Featured <span className="gradient-text">Work</span>
           </h2>
           <p className="text-[#94A3B8] max-w-xl mx-auto">
-            Click any project to see full details, impact metrics, and technology breakdown.
+            Production data engineering work. Click any project for the business problem,
+            architecture, and impact.
           </p>
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project, i) => (
             <motion.div
               key={project.id}
               initial={{ opacity: 0, y: 40 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
-              transition={{ duration: 0.6, delay: i * 0.2 }}
+              transition={{ duration: 0.6, delay: i * 0.15 }}
               onMouseEnter={() => setHovered(project.id)}
               onMouseLeave={() => setHovered(null)}
               onClick={() => setSelected(project)}
@@ -163,7 +235,6 @@ export default function Projects() {
                 style={{ background: `radial-gradient(circle at 50% 0%, ${project.color}08 0%, transparent 70%)` }}
               />
 
-              {/* 3D tilt effect via CSS */}
               <div className="relative z-10">
                 {/* Header */}
                 <div className="flex items-start justify-between mb-5">
@@ -192,8 +263,8 @@ export default function Projects() {
 
                 {/* Impact badge */}
                 <div className="flex items-center gap-2 px-3 py-2 rounded-xl mb-5" style={{ background: `${project.color}10`, border: `1px solid ${project.color}20` }}>
-                  <TrendingUp className="w-3.5 h-3.5" style={{ color: project.color }} />
-                  <span className="text-xs font-mono" style={{ color: project.color }}>{project.impact}</span>
+                  <TrendingUp className="w-3.5 h-3.5 shrink-0" style={{ color: project.color }} />
+                  <span className="text-xs font-mono" style={{ color: project.color }}>{project.impactHeadline}</span>
                 </div>
 
                 {/* Tags */}
